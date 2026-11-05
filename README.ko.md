@@ -5,7 +5,7 @@
 <p align="center">캐릭터 일러스트 한 장으로 AI 에이전트와 역할을 나누어 VRM 아바타를 만드는 키트입니다.</p>
 
 <p align="center"><a href="README.md">English</a> ·
-  <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a> · <a href="docs/tutorial.ko.md"><b>튜토리얼</b></a> · <a href="https://github.com/nanocle/Charakuru/releases">다운로드 (Releases)</a> · <a href="docs/license.ko.md">이용 조건</a> · <a href="https://discord.gg/tripoai"><b>Discord</b></a></p>
+  <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a> · <a href="docs/tutorial.ko.md"><b>튜토리얼</b></a> · <a href="docs/authoring-rules.ko.md"><b>작성 규칙</b></a> · <a href="https://github.com/nanocle/Charakuru/releases">다운로드 (Releases)</a> · <a href="docs/license.ko.md">이용 조건</a> · <a href="https://discord.gg/tripoai"><b>Discord</b></a></p>
 
 <p align="center"><img alt="version" src="https://img.shields.io/badge/version-1.1.0-22d3ee"> <img alt="Node.js" src="https://img.shields.io/badge/Node.js-22%2B-5fa04e"> <img alt="output" src="https://img.shields.io/badge/output-VRM%201.0-a78bfa"> <img alt="license" src="https://img.shields.io/badge/license-source--available-64748b"></p>
 
