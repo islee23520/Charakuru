@@ -1,0 +1,39 @@
+{
+  "profiles": {
+    "base_body": { "quad": true, "face_limit": 12000, "tri_limit": 24000 },
+    "head": { "quad": true, "face_limit": 6000, "tri_limit": 12000 },
+    "dressed_for_segment": { "quad": false, "face_limit": 40000, "tri_limit": 40000 },
+    "single_part": { "quad": false, "face_limit": 20000, "tri_limit": 20000 }
+  },
+  "budget": {
+    "assembled_cap": 60000,
+    "components": {
+      "head": 12000,
+      "body": 24000,
+      "hair_cards": 8000,
+      "garments": 24000,
+      "props": 3000
+    }
+  },
+  "prices": {
+    "p2_no_tex": 100,
+    "p2_tex_standard": 110,
+    "retexture": 45,
+    "smartsegment": 55,
+    "segment_v2": 40
+  },
+  "stages": {
+    "male_base": { "person": "jojaepyo", "allocation": 260, "required": [{ "step": "body_geometry", "price_key": "p2_no_tex", "count": 2 }, { "step": "chosen_body_retexture", "price_key": "retexture", "count": 1 }] },
+    "female_base": { "person": "iyeon", "allocation": 260, "required": [{ "step": "body_geometry", "price_key": "p2_no_tex", "count": 2 }, { "step": "chosen_body_retexture", "price_key": "retexture", "count": 1 }] },
+    "male_pilot_outfit": { "person": null, "allocation": 220, "required": [{ "step": "dressed_outfit", "price_key": "p2_tex_standard", "count": 1 }, { "step": "smartsegment", "price_key": "smartsegment", "count": 1 }, { "step": "segment_v2_retry", "price_key": "segment_v2", "count": 1 }] },
+    "female_pilot_outfit": { "person": null, "allocation": 220, "required": [{ "step": "dressed_outfit", "price_key": "p2_tex_standard", "count": 1 }, { "step": "smartsegment", "price_key": "smartsegment", "count": 1 }, { "step": "segment_v2_retry", "price_key": "segment_v2", "count": 1 }] },
+    "iilseop": { "person": "iilseop", "allocation": 150, "required": [{ "step": "face", "price_key": "p2_tex_standard", "count": 1 }] },
+    "gimyeongyu": { "person": "gimyeongyu", "allocation": 300, "required": [{ "step": "face", "price_key": "p2_tex_standard", "count": 1 }, { "step": "dressed_outfit", "price_key": "p2_tex_standard", "count": 1 }, { "step": "smartsegment", "price_key": "smartsegment", "count": 1 }] },
+    "minunggi": { "person": "minunggi", "allocation": 150, "required": [{ "step": "face", "price_key": "p2_tex_standard", "count": 1 }] },
+    "sinjongmok": { "person": "sinjongmok", "allocation": 300, "required": [{ "step": "face", "price_key": "p2_tex_standard", "count": 1 }, { "step": "dressed_outfit", "price_key": "p2_tex_standard", "count": 1 }, { "step": "smartsegment", "price_key": "smartsegment", "count": 1 }] },
+    "bakseongsu": { "person": "bakseongsu", "allocation": 250, "required": [{ "step": "face", "price_key": "p2_tex_standard", "count": 1 }, { "step": "tool_roll_and_gloves", "price_key": "p2_tex_standard", "count": 1 }] },
+    "jiyeonhui": { "person": "jiyeonhui", "allocation": 300, "required": [{ "step": "face", "price_key": "p2_tex_standard", "count": 1 }, { "step": "dressed_outfit", "price_key": "p2_tex_standard", "count": 1 }, { "step": "smartsegment", "price_key": "smartsegment", "count": 1 }] },
+    "jeongyura": { "person": "jeongyura", "allocation": 150, "required": [{ "step": "face", "price_key": "p2_tex_standard", "count": 1 }] },
+    "reserve": { "person": null, "allocation": 440, "required": [] }
+  }
+}
