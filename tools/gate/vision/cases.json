@@ -1,0 +1,300 @@
+[
+  {
+    "name": "render-manifest-good",
+    "summary": "fixture render dir matches the static 20-file contract, facing/rolls/anatomy recorded",
+    "steps": [
+      { "mkfixtures": "$FIX" },
+      { "run": ["node", "tools/gate/vision/check-render-manifest.mjs", "$FIX", "--static"] }
+    ],
+    "expect": { "exit": 0 }
+  },
+  {
+    "name": "render-manifest-missing-file",
+    "summary": "deleting one render from disk must fail, even though the manifest still lists it",
+    "steps": [
+      { "mkfixtures": "$FIX" },
+      { "unlink": "$FIX/crop-eyes.png" },
+      { "run": ["node", "tools/gate/vision/check-render-manifest.mjs", "$FIX", "--static"] }
+    ],
+    "expect": { "exit": 1, "contains": "FileMissing:crop-eyes.png" }
+  },
+  {
+    "name": "render-manifest-sha-mismatch",
+    "summary": "changing one byte on disk (log still says success) must fail the sha assertion",
+    "steps": [
+      { "mkfixtures": "$FIX" },
+      { "appendByte": "$FIX/crop-lips.png" },
+      { "run": ["node", "tools/gate/vision/check-render-manifest.mjs", "$FIX", "--static"] }
+    ],
+    "expect": { "exit": 1, "contains": "ShaMismatch:crop-lips.png" }
+  },
+  {
+    "name": "render-manifest-facing-invalid",
+    "summary": "a manifest without the facing record is rejected",
+    "steps": [
+      { "mkfixtures": "$FIX" },
+      { "patchJson": ["$FIX/manifest.json", { "facing": null }] },
+      { "run": ["node", "tools/gate/vision/check-render-manifest.mjs", "$FIX", "--static"] }
+    ],
+    "expect": { "exit": 1, "contains": "FacingInvalid" }
+  },
+  {
+    "name": "render-manifest-roll-exceeded",
+    "summary": "a view with a measured roll above 2 degrees is rejected (the old upside-down back view)",
+    "steps": [
+      { "mkfixtures": "$FIX" },
+      { "patchJson": ["$FIX/manifest.json", { "camera_rolls_deg.body-back": 179.8 }] },
+      { "run": ["node", "tools/gate/vision/check-render-manifest.mjs", "$FIX", "--static"] }
+    ],
+    "expect": { "exit": 1, "contains": "RollExceeded:body-back" }
+  },
+  {
+    "name": "render-manifest-sit-penetration",
+    "summary": "a sit pose recorded with more than 2 cm box penetration is rejected",
+    "steps": [
+      { "mkfixtures": "$FIX" },
+      { "patchJson": ["$FIX/manifest.json", {
+          "poses.applied": ["sit"],
+          "poses.sit_box_contact": { "box_top_m": 0.45, "seat_z_m": 0.4, "penetration_m": 0.05 }
+        }] },
+      { "run": ["node", "tools/gate/vision/check-render-manifest.mjs", "$FIX", "--static"] }
+    ],
+    "expect": { "exit": 1, "contains": "SitBoxPenetration" }
+  },
+  {
+    "name": "render-manifest-anatomy-invalid",
+    "summary": "a manifest without the anatomy record (measured/bands/anatomy_ok/SourceOutOfBand) is rejected",
+    "steps": [
+      { "mkfixtures": "$FIX" },
+      { "patchJson": ["$FIX/manifest.json", { "anatomy": null, "anatomy_ok": null }] },
+      { "run": ["node", "tools/gate/vision/check-render-manifest.mjs", "$FIX", "--static"] }
+    ],
+    "expect": { "exit": 1, "contains": "AnatomyInvalid" }
+  },
+  {
+    "name": "render-facing-wrong-axis",
+    "summary": "+Y forced declared axis (exact opposite) must exit 1 with FacingCheckFailed specifically (not BlankFrame) and leave no manifest",
+    "steps": [
+      { "copyFile": ["tools/gate/render-views.py", "$TMP/rv-flipped.py"] },
+      { "sedReplace": ["$TMP/rv-flipped.py",
+        "return Vector((0.0, -1.0, 0.0)), \"vrm1-gltf-zplus\", \"high\"",
+        "return Vector((0.0, 1.0, 0.0)), \"vrm1-gltf-zplus\", \"high\""] },
+      { "run": ["C:/Program Files/Blender Foundation/Blender 5.2/blender.exe", "-b",
+                "-P", "$TMP/rv-flipped.py", "--",
+                "E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm",
+                "$TMP/facing", "--preset", "G5"] },
+      { "assertNoFile": "$TMP/facing/manifest.json" }
+    ],
+    "expect": { "exit": 1, "contains": "FacingCheckFailed", "absent": "BlankFrame" }
+  },
+  {
+    "name": "render-facing-axis-plusX",
+    "summary": "+X forced declared axis (a SIDE) must now fail the independent geometric angle check",
+    "steps": [
+      { "copyFile": ["tools/gate/render-views.py", "$TMP/rv-pX.py"] },
+      { "sedReplace": ["$TMP/rv-pX.py",
+        "return Vector((0.0, -1.0, 0.0)), \"vrm1-gltf-zplus\", \"high\"",
+        "return Vector((1.0, 0.0, 0.0)), \"vrm1-gltf-zplus\", \"high\""] },
+      { "run": ["C:/Program Files/Blender Foundation/Blender 5.2/blender.exe", "-b",
+                "-P", "$TMP/rv-pX.py", "--",
+                "E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm",
+                "$TMP/axpX", "--preset", "G5"] },
+      { "assertNoFile": "$TMP/axpX/manifest.json" }
+    ],
+    "expect": { "exit": 1, "contains": "FacingCheckFailed" }
+  },
+  {
+    "name": "render-facing-axis-minusX",
+    "summary": "-X forced declared axis must fail the independent geometric angle check",
+    "steps": [
+      { "copyFile": ["tools/gate/render-views.py", "$TMP/rv-mX.py"] },
+      { "sedReplace": ["$TMP/rv-mX.py",
+        "return Vector((0.0, -1.0, 0.0)), \"vrm1-gltf-zplus\", \"high\"",
+        "return Vector((-1.0, 0.0, 0.0)), \"vrm1-gltf-zplus\", \"high\""] },
+      { "run": ["C:/Program Files/Blender Foundation/Blender 5.2/blender.exe", "-b",
+                "-P", "$TMP/rv-mX.py", "--",
+                "E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm",
+                "$TMP/axmX", "--preset", "G5"] },
+      { "assertNoFile": "$TMP/axmX/manifest.json" }
+    ],
+    "expect": { "exit": 1, "contains": "FacingCheckFailed" }
+  },
+  {
+    "name": "render-facing-axis-plusZ",
+    "summary": "+Z forced declared axis must fail (measured facing is horizontal)",
+    "steps": [
+      { "copyFile": ["tools/gate/render-views.py", "$TMP/rv-pZ.py"] },
+      { "sedReplace": ["$TMP/rv-pZ.py",
+        "return Vector((0.0, -1.0, 0.0)), \"vrm1-gltf-zplus\", \"high\"",
+        "return Vector((0.0, 0.0, 1.0)), \"vrm1-gltf-zplus\", \"high\""] },
+      { "run": ["C:/Program Files/Blender Foundation/Blender 5.2/blender.exe", "-b",
+                "-P", "$TMP/rv-pZ.py", "--",
+                "E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm",
+                "$TMP/axpZ", "--preset", "G5"] },
+      { "assertNoFile": "$TMP/axpZ/manifest.json" }
+    ],
+    "expect": { "exit": 1, "contains": "FacingCheckFailed" }
+  },
+  {
+    "name": "render-facing-axis-minusZ",
+    "summary": "-Z forced declared axis must fail (previously crashed with no-face-vertices; must fail closed)",
+    "steps": [
+      { "copyFile": ["tools/gate/render-views.py", "$TMP/rv-mZ.py"] },
+      { "sedReplace": ["$TMP/rv-mZ.py",
+        "return Vector((0.0, -1.0, 0.0)), \"vrm1-gltf-zplus\", \"high\"",
+        "return Vector((0.0, 0.0, -1.0)), \"vrm1-gltf-zplus\", \"high\""] },
+      { "run": ["C:/Program Files/Blender Foundation/Blender 5.2/blender.exe", "-b",
+                "-P", "$TMP/rv-mZ.py", "--",
+                "E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm",
+                "$TMP/axmZ", "--preset", "G5"] },
+      { "assertNoFile": "$TMP/axmZ/manifest.json" }
+    ],
+    "expect": { "exit": 1, "contains": "FacingCheckFailed", "absent": "RenderFailed:TypeError" }
+  },
+  {
+    "name": "render-facing-axis-correct-minusY",
+    "summary": "the correct axis (-Y, VRM1 default) passes end to end",
+    "steps": [
+      { "copyFile": ["tools/gate/render-views.py", "$TMP/rv-mY.py"] },
+      { "sedReplace": ["$TMP/rv-mY.py",
+        "return Vector((0.0, -1.0, 0.0)), \"vrm1-gltf-zplus\", \"high\"",
+        "return Vector((0.0, -1.0, 0.0)), \"vrm1-gltf-zplus\", \"high\""] },
+      { "run": ["C:/Program Files/Blender Foundation/Blender 5.2/blender.exe", "-b",
+                "-P", "$TMP/rv-mY.py", "--",
+                "E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm",
+                "$TMP/axmY", "--preset", "G5"] },
+      { "run": ["node", "tools/gate/vision/check-render-manifest.mjs", "$TMP/axmY", "--preset", "G5", "--min-png", "25"] }
+    ],
+    "expect": { "exit": 0, "contains": "\"ok\": true" }
+  },
+  {
+    "name": "render-plain-glb-landmark-facing",
+    "summary": "a GLB with the VRM extensions stripped has no declared axis: the measured landmark facing is used (source: landmark), never a TypeError",
+    "steps": [
+      { "stripGlbExtension": ["E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm", "$TMP/plain.glb", "VRMC_vrm", "VRM"] },
+      { "run": ["C:/Program Files/Blender Foundation/Blender 5.2/blender.exe", "-b",
+                "-P", "tools/gate/render-views.py", "--",
+                "$TMP/plain.glb", "$TMP/plain", "--preset", "G5"] },
+      { "run": ["node", "tools/gate/vision/check-render-manifest.mjs", "$TMP/plain", "--preset", "G5", "--min-png", "20"] },
+      { "assertJson": ["$TMP/plain/manifest.json", "facing.source", "landmark"] }
+    ],
+    "expect": { "exit": 0, "absent": "RenderFailed:TypeError" }
+  },
+  {
+    "name": "real-g5-crotch-metric",
+    "summary": "crotch_z_m is the inseam vertex (0.5179 for jojaepyo, within 2%), is NOT the lowest central vertex, and crotch_to_height is in-band (not in SourceOutOfBand)",
+    "steps": [
+      { "assertJsonClose": [".omo/evidence/modular-cast-tripo-parts/task-6-vision/g5-jojaepyo/manifest.json",
+                              "anatomy.measured.crotch_z_m", 0.5179, 2] },
+      { "assertJsonNe": [".omo/evidence/modular-cast-tripo-parts/task-6-vision/g5-jojaepyo/manifest.json",
+                          "anatomy.measured.crotch_z_m", "anatomy.measured.lowest_central_vertex_m"] },
+      { "assertJsonNotIn": [".omo/evidence/modular-cast-tripo-parts/task-6-vision/g5-jojaepyo/manifest.json",
+                             "anatomy.SourceOutOfBand", "crotch_to_height"] }
+    ],
+    "expect": { "exit": 0 }
+  },
+  {
+    "name": "render-reproducible",
+    "summary": "two full G5 renders of the same input produce identical manifest bytes and identical per-file sha256 lists (Date/RenderTime PNG chunks stripped); each render is about 35 s",
+    "steps": [
+      { "run": ["C:/Program Files/Blender Foundation/Blender 5.2/blender.exe", "-b",
+                "-P", "tools/gate/render-views.py", "--",
+                "E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm",
+                "$TMP/rep1", "--preset", "G5"] },
+      { "run": ["C:/Program Files/Blender Foundation/Blender 5.2/blender.exe", "-b",
+                "-P", "tools/gate/render-views.py", "--",
+                "E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm",
+                "$TMP/rep2", "--preset", "G5"] },
+      { "assertIdenticalRenders": ["$TMP/rep1", "$TMP/rep2"] }
+    ],
+    "expect": { "exit": 0 }
+  },
+  {
+    "name": "verdict-valid",
+    "summary": "a schema-valid, non-stale synthetic PASS verdict is accepted",
+    "steps": [
+      { "mkfixtures": "$FIX" },
+      { "run": ["node", "tools/gate/vision/check-verdict.mjs", "$FIX/verdict-pass.json", "--manifest", "$FIX/manifest.json"] }
+    ],
+    "expect": { "exit": 0, "contains": "\"ok\": true" }
+  },
+  {
+    "name": "verdict-malformed-not-pass",
+    "summary": "a verdict missing identity_score is rejected and not counted as a pass",
+    "steps": [
+      { "mkfixtures": "$FIX" },
+      { "run": ["node", "tools/gate/vision/check-verdict.mjs", "$FIX/verdict-malformed.json", "--manifest", "$FIX/manifest.json"] }
+    ],
+    "expect": { "exit": 1, "contains": "VerdictInvalid" }
+  },
+  {
+    "name": "verdict-stale",
+    "summary": "a verdict whose render sha256 does not match the current manifest is rejected as stale",
+    "steps": [
+      { "mkfixtures": "$FIX" },
+      { "run": ["node", "tools/gate/vision/check-verdict.mjs", "$FIX/verdict-stale.json", "--manifest", "$FIX/manifest.json"] }
+    ],
+    "expect": { "exit": 1, "contains": "StaleVerdict" }
+  },
+  {
+    "name": "verdict-stale-regenerated-renders",
+    "summary": "verdict sha matches the manifest but the files on disk were regenerated",
+    "steps": [
+      { "mkfixtures": "$FIX" },
+      { "appendByte": "$FIX/crop-eyes.png" },
+      { "run": ["node", "tools/gate/vision/check-verdict.mjs", "$FIX/verdict-pass.json", "--manifest", "$FIX/manifest.json"] }
+    ],
+    "expect": { "exit": 1, "contains": "StaleVerdict" }
+  },
+  {
+    "name": "verdict-contradiction",
+    "summary": "PASS with a failing checklist item is rejected",
+    "steps": [
+      { "mkfixtures": "$FIX" },
+      { "run": ["node", "tools/gate/vision/check-verdict.mjs", "$FIX/verdict-contradiction.json", "--manifest", "$FIX/manifest.json"] }
+    ],
+    "expect": { "exit": 1, "contains": "VerdictContradiction" }
+  },
+  {
+    "name": "verdict-crop-missing",
+    "summary": "FAIL verdict without a crop citation is rejected (every FAIL cites a crop)",
+    "steps": [
+      { "mkfixtures": "$FIX" },
+      { "run": ["node", "tools/gate/vision/check-verdict.mjs", "$FIX/verdict-crop-missing.json", "--manifest", "$FIX/manifest.json"] }
+    ],
+    "expect": { "exit": 1, "contains": "CropMissing" }
+  },
+  {
+    "name": "real-g5-manifest",
+    "summary": "the real jojaepyo G5 render dir passes the full manifest assertion",
+    "steps": [
+      { "run": ["node", "tools/gate/vision/check-render-manifest.mjs",
+                ".omo/evidence/modular-cast-tripo-parts/task-6-vision/g5-jojaepyo",
+                "--preset", "G5", "--min-png", "25"] }
+    ],
+    "expect": { "exit": 0, "contains": "\"ok\": true" }
+  },
+  {
+    "name": "render-crash-nonzero",
+    "summary": "an uncaught RuntimeError inside the script must exit 1 with RenderFailed (Blender -P swallows it as exit 0 otherwise)",
+    "steps": [
+      { "run": ["C:/Program Files/Blender Foundation/Blender 5.2/blender.exe", "-b",
+                "-P", "tools/gate/render-views.py", "--",
+                "E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm",
+                "$TMP/crash", "--preset", "G5", "--self-test-crash"] }
+    ],
+    "expect": { "exit": 1, "contains": "RenderFailed:RuntimeError" }
+  },
+  {
+    "name": "render-real-g5",
+    "summary": "a full real G5 render into a temp dir exits 0 and passes the manifest assertion",
+    "steps": [
+      { "run": ["C:/Program Files/Blender Foundation/Blender 5.2/blender.exe", "-b",
+                "-P", "tools/gate/render-views.py", "--",
+                "E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm",
+                "$TMP/real", "--preset", "G5"] },
+      { "run": ["node", "tools/gate/vision/check-render-manifest.mjs", "$TMP/real", "--preset", "G5", "--min-png", "25"] }
+    ],
+    "expect": { "exit": 0, "contains": "\"ok\": true" }
+  }
+]
