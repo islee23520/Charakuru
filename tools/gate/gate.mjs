@@ -53,9 +53,29 @@ async function fileSha(file) {
   return sha256(await readFile(file));
 }
 
+const ASSET_NAME = /^(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+$/;
+const RESERVED_SEGMENT = /^(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i;
+const MAX_ASSET_LENGTH = 128;
+
+function assetFailure(asset) {
+  if (typeof asset !== "string" || asset.length === 0 || asset.length > MAX_ASSET_LENGTH) return "AssetNameInvalid";
+  if (asset.includes("\0") || asset.includes("\\") || asset.includes(":") || asset.includes(".")) return "AssetNameInvalid";
+  if (!ASSET_NAME.test(asset)) return "AssetNameInvalid";
+  if (asset.split("/").some((segment) => RESERVED_SEGMENT.test(segment))) return "AssetNameReserved";
+  return null;
+}
+
 function gatePath(asset, gate) {
-  const person = asset.split("-")[0];
-  return path.join(charactersRoot, person, "gates", `${gate}-${asset}.json`);
+  const failure = assetFailure(asset);
+  if (failure) throw new Error(failure);
+  const person = asset.split("/")[0].split("-")[0];
+  const file = path.resolve(charactersRoot, person, "gates", `${gate}-${asset.replaceAll("/", "-")}.json`);
+  const rootResolved = path.resolve(charactersRoot);
+  const relative = path.relative(rootResolved, file);
+  const inside = relative !== "" && !path.isAbsolute(relative) && !relative.split(path.sep).includes("..");
+  const prefix = rootResolved.toLowerCase().endsWith(path.sep.toLowerCase()) ? rootResolved.toLowerCase() : `${rootResolved.toLowerCase()}${path.sep}`;
+  if (!inside || !file.toLowerCase().startsWith(prefix)) throw new Error("AssetPathEscape");
+  return file;
 }
 
 function evidenceHash(parts) {
@@ -197,7 +217,10 @@ async function requireGate(asset, gate) {
 async function main() {
   const [command, asset, gate, ...rest] = process.argv.slice(2);
   const flags = options(rest);
-  if (!command || !asset || !gate || !/^G\d+$/.test(gate)) throw new Error("Usage:gate <aggregate|confirm|require> <asset> <gate>");
+  if (!command || asset === undefined || !gate) throw new Error("Usage:gate <aggregate|confirm|require> <asset> <gate>");
+  if (!/^G[0-5]$/.test(gate)) throw new Error("GateNameInvalid");
+  const named = assetFailure(asset);
+  if (named) throw new Error(named);
   const profile = JSON.parse(await readFile(profilesPath, "utf8"));
   if (command === "aggregate") await aggregate(asset, gate, flags, profile);
   else if (command === "confirm") await confirm(asset, gate, flags);
