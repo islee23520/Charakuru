@@ -1,0 +1,352 @@
+{
+  "cases": [
+    {
+      "name": "aggregate dotdot",
+      "command": "aggregate",
+      "asset": "../../x",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "aggregate backslash",
+      "command": "aggregate",
+      "asset": "..\\\\..\\\\x",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "aggregate mid-dotdot",
+      "command": "aggregate",
+      "asset": "a/../../x",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "aggregate abs",
+      "command": "aggregate",
+      "asset": "/abs",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "aggregate drive",
+      "command": "aggregate",
+      "asset": "C:\\\\x",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "aggregate trailing-dotdot",
+      "command": "aggregate",
+      "asset": "x/..",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "aggregate empty",
+      "command": "aggregate",
+      "asset": "",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "aggregate nul",
+      "command": "aggregate",
+      "asset": "a\u0000b",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "aggregate device",
+      "command": "aggregate",
+      "asset": "CON",
+      "gate": "G0",
+      "code": "AssetNameReserved"
+    },
+    {
+      "name": "aggregate long",
+      "command": "aggregate",
+      "asset": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "aggregate space",
+      "command": "aggregate",
+      "asset": "has space",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "aggregate unicode",
+      "command": "aggregate",
+      "asset": "이일섭",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "aggregate bad-gate",
+      "command": "aggregate",
+      "asset": "iilseop-head",
+      "gate": "G9",
+      "code": "GateNameInvalid"
+    },
+    {
+      "name": "confirm dotdot",
+      "command": "confirm",
+      "asset": "../../x",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "confirm backslash",
+      "command": "confirm",
+      "asset": "..\\\\..\\\\x",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "confirm mid-dotdot",
+      "command": "confirm",
+      "asset": "a/../../x",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "confirm abs",
+      "command": "confirm",
+      "asset": "/abs",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "confirm drive",
+      "command": "confirm",
+      "asset": "C:\\\\x",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "confirm trailing-dotdot",
+      "command": "confirm",
+      "asset": "x/..",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "confirm empty",
+      "command": "confirm",
+      "asset": "",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "confirm nul",
+      "command": "confirm",
+      "asset": "a\u0000b",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "confirm device",
+      "command": "confirm",
+      "asset": "CON",
+      "gate": "G0",
+      "code": "AssetNameReserved"
+    },
+    {
+      "name": "confirm long",
+      "command": "confirm",
+      "asset": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "confirm space",
+      "command": "confirm",
+      "asset": "has space",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "confirm unicode",
+      "command": "confirm",
+      "asset": "이일섭",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "confirm bad-gate",
+      "command": "confirm",
+      "asset": "iilseop-head",
+      "gate": "G9",
+      "code": "GateNameInvalid"
+    },
+    {
+      "name": "require dotdot",
+      "command": "require",
+      "asset": "../../x",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "require backslash",
+      "command": "require",
+      "asset": "..\\\\..\\\\x",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "require mid-dotdot",
+      "command": "require",
+      "asset": "a/../../x",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "require abs",
+      "command": "require",
+      "asset": "/abs",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "require drive",
+      "command": "require",
+      "asset": "C:\\\\x",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "require trailing-dotdot",
+      "command": "require",
+      "asset": "x/..",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "require empty",
+      "command": "require",
+      "asset": "",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "require nul",
+      "command": "require",
+      "asset": "a\u0000b",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "require device",
+      "command": "require",
+      "asset": "CON",
+      "gate": "G0",
+      "code": "AssetNameReserved"
+    },
+    {
+      "name": "require long",
+      "command": "require",
+      "asset": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "require space",
+      "command": "require",
+      "asset": "has space",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "require unicode",
+      "command": "require",
+      "asset": "이일섭",
+      "gate": "G0",
+      "code": "AssetNameInvalid"
+    },
+    {
+      "name": "require bad-gate",
+      "command": "require",
+      "asset": "iilseop-head",
+      "gate": "G9",
+      "code": "GateNameInvalid"
+    },
+    {
+      "name": "aggregate junction outside",
+      "command": "aggregate",
+      "asset": "link/x",
+      "gate": "G0",
+      "junction": "outside",
+      "code": "AssetPathEscape"
+    },
+    {
+      "name": "confirm junction outside",
+      "command": "confirm",
+      "asset": "link/x",
+      "gate": "G0",
+      "junction": "outside",
+      "code": "AssetPathEscape"
+    },
+    {
+      "name": "require junction outside",
+      "command": "require",
+      "asset": "link/x",
+      "gate": "G0",
+      "junction": "outside",
+      "code": "AssetPathEscape"
+    },
+    {
+      "name": "aggregate junction inside",
+      "command": "aggregate",
+      "asset": "link/x",
+      "gate": "G0",
+      "junction": "inside",
+      "exit": 0,
+      "status": "REVIEW_PASS"
+    },
+    {
+      "name": "confirm junction inside",
+      "command": "confirm",
+      "asset": "link/x",
+      "gate": "G0",
+      "junction": "inside",
+      "exit": 0,
+      "status": "PASS"
+    },
+    {
+      "name": "require junction inside",
+      "command": "require",
+      "asset": "link/x",
+      "gate": "G0",
+      "junction": "inside",
+      "exit": 0,
+      "status": "PASS"
+    },
+    {
+      "name": "aggregate junction loop",
+      "command": "aggregate",
+      "asset": "loop/x",
+      "gate": "G0",
+      "junction": "loop",
+      "code": "AssetPathEscape"
+    },
+    {
+      "name": "confirm junction loop",
+      "command": "confirm",
+      "asset": "loop/x",
+      "gate": "G0",
+      "junction": "loop",
+      "code": "AssetPathEscape"
+    },
+    {
+      "name": "require junction loop",
+      "command": "require",
+      "asset": "loop/x",
+      "gate": "G0",
+      "junction": "loop",
+      "code": "AssetPathEscape"
+    }
+  ]
+}

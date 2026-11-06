@@ -1,0 +1,20 @@
+{
+  "global_cap": 3000,
+  "person_cap": 400,
+  "reserve_draw_cap": 100,
+  "stages": {
+    "male_base": { "person": "jojaepyo", "allocation": 260, "spent": 0 },
+    "female_base": { "person": "iyeon", "allocation": 260, "spent": 0 },
+    "male_pilot_outfit": { "person": null, "allocation": 220, "spent": 0 },
+    "female_pilot_outfit": { "person": null, "allocation": 220, "spent": 0 },
+    "iilseop": { "person": "iilseop", "allocation": 150, "spent": 0 },
+    "gimyeongyu": { "person": "gimyeongyu", "allocation": 300, "spent": 0 },
+    "minunggi": { "person": "minunggi", "allocation": 150, "spent": 0 },
+    "sinjongmok": { "person": "sinjongmok", "allocation": 300, "spent": 0 },
+    "bakseongsu": { "person": "bakseongsu", "allocation": 250, "spent": 0 },
+    "jiyeonhui": { "person": "jiyeonhui", "allocation": 300, "spent": 0 },
+    "jeongyura": { "person": "jeongyura", "allocation": 150, "spent": 0 },
+    "reserve": { "person": null, "allocation": 440, "spent": 0 }
+  },
+  "tasks": []
+}
