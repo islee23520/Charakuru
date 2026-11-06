@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { createHash } from "node:crypto";
+import { lstatSync, realpathSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -75,7 +76,34 @@ function gatePath(asset, gate) {
   const inside = relative !== "" && !path.isAbsolute(relative) && !relative.split(path.sep).includes("..");
   const prefix = rootResolved.toLowerCase().endsWith(path.sep.toLowerCase()) ? rootResolved.toLowerCase() : `${rootResolved.toLowerCase()}${path.sep}`;
   if (!inside || !file.toLowerCase().startsWith(prefix)) throw new Error("AssetPathEscape");
+  if (!realInside(rootResolved, file)) throw new Error("AssetPathEscape");
   return file;
+}
+
+// A junction or symlink inside the characters root must not carry a valid name outside it: resolve the
+// deepest existing ancestor, re-join the missing remainder, and compare against the real root.
+function realInside(rootResolved, file) {
+  const fold = (value) => (process.platform === "win32" ? value.toLowerCase() : value);
+  const relative = path.relative(fold(realPath(rootResolved)), fold(realPath(file)));
+  return relative !== "" && !path.isAbsolute(relative) && !relative.split(path.sep).includes("..");
+}
+
+// realpath of the deepest existing ancestor plus the not-yet-created remainder. A dangling link or a
+// loop (ELOOP) is refused: mkdir would follow it to wherever it points.
+function realPath(target) {
+  const missing = [];
+  let existing = target;
+  for (;;) {
+    try {
+      return path.join(realpathSync.native(existing), ...missing);
+    } catch (error) {
+      if (error.code !== "ENOENT" || lstatSync(existing, { throwIfNoEntry: false })) throw new Error("AssetPathEscape");
+      const parent = path.dirname(existing);
+      if (parent === existing) throw new Error("AssetPathEscape");
+      missing.unshift(path.basename(existing));
+      existing = parent;
+    }
+  }
 }
 
 function evidenceHash(parts) {

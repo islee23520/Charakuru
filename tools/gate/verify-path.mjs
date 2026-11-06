@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { createHash } from "node:crypto";
-import { mkdtemp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -8,20 +8,46 @@ import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const gateScript = path.join(here, "gate.mjs");
+// NUL cannot travel through a Windows argv, so NUL cases run the CLI through this wrapper (see its header).
+const nulWrapper = path.join(here, "fixtures", "adversarial-argv.mjs");
 const { cases } = JSON.parse(await readFile(path.join(here, "path-cases.json"), "utf8"));
+const linkType = process.platform === "win32" ? "junction" : "dir";
 
+// Every file and link under dir with its content hash; links are recorded, never followed.
 async function tree(dir) {
   const found = [];
   async function walk(current) {
-    const entries = await readdir(current, { withFileTypes: true });
-    for (const entry of entries) {
+    for (const entry of await readdir(current, { withFileTypes: true })) {
       const full = path.join(current, entry.name);
-      if (entry.isDirectory()) await walk(full);
-      else found.push(full);
+      if (entry.isSymbolicLink()) found.push(`${full}\tlink`);
+      else if (entry.isDirectory()) await walk(full);
+      else found.push(`${full}\t${createHash("sha256").update(await readFile(full)).digest("hex")}`);
     }
   }
   await walk(dir);
   return found.sort();
+}
+
+function gateRecord(asset, gate, status) {
+  return `${JSON.stringify({ asset, gate, status, userConfirmation: null, supersededConfirmations: [] })}\n`;
+}
+
+// Builds the junction layout a case names inside the characters root. Returns the directory the
+// gate file really lives in, or null for a loop.
+async function plantJunction(test, dir, characters) {
+  const kind = test.junction;
+  const linkName = test.asset.split("/")[0];
+  if (kind === "loop") {
+    await symlink(path.join(characters, `${linkName}2`), path.join(characters, linkName), linkType);
+    await symlink(path.join(characters, linkName), path.join(characters, `${linkName}2`), linkType);
+    return null;
+  }
+  const real = kind === "outside" ? path.join(dir, "outside") : path.join(characters, "real");
+  await mkdir(path.join(real, "gates"), { recursive: true });
+  await symlink(real, path.join(characters, linkName), linkType);
+  const status = test.command === "confirm" ? "REVIEW_PASS" : test.command === "require" ? "PASS" : null;
+  if (status) await writeFile(path.join(real, "gates", `${test.gate}-${test.asset.replaceAll("/", "-")}.json`), gateRecord(test.asset, test.gate, status));
+  return real;
 }
 
 let passed = 0;
@@ -37,28 +63,50 @@ for (const test of cases) {
   await writeFile(auto, `${JSON.stringify({ ok: true, blocking: [] })}\n`);
   await writeFile(verdictA, `${JSON.stringify({ ...verdict, reviewer: "reviewer-a" })}\n`);
   await writeFile(verdictB, `${JSON.stringify({ ...verdict, reviewer: "reviewer-b" })}\n`);
+  let real = null;
+  if (test.junction) {
+    try {
+      real = await plantJunction(test, dir, characters);
+    } catch (error) {
+      if (error.code !== "EPERM") throw error;
+      failed += 1;
+      console.error(`${test.name}: SKIP: symlinks not permitted`);
+      await rm(dir, { recursive: true, force: true });
+      continue;
+    }
+  }
   const before = await tree(dir);
-  const digestBefore = createHash("sha256").update(before.join("\n")).digest("hex");
   const env = { ...process.env, GATE_CHARACTERS_ROOT: characters, GATE_PROFILES_FILE: path.join(here, "profiles.json") };
-  const envAsset = test.asset === "" || test.asset.includes("\0");
-  const assetArgs = envAsset ? ["placeholder"] : [test.asset];
+  const nul = test.asset.includes("\0");
+  const assetArg = nul ? "placeholder" : test.asset;
   const args = test.command === "aggregate"
-    ? ["aggregate", ...assetArgs, test.gate, "--auto", auto, "--verdict", verdictA, "--verdict-b", verdictB]
+    ? ["aggregate", assetArg, test.gate, "--auto", auto, "--verdict", verdictA, "--verdict-b", verdictB]
     : test.command === "confirm"
-      ? ["confirm", ...assetArgs, test.gate, "--note", "escape attempt"]
-      : ["require", ...assetArgs, test.gate];
-  const stepEnv = envAsset ? { ...env, ADVERSARIAL_ARG: test.asset === "" ? "-" : "nul" } : env;
-  const launch = stepEnv.ADVERSARIAL_ARG ? ["--import", "E:/git/Charakuru-wt/modular-cast-w0/tools/gate/fixtures/adversarial-argv.mjs"] : [];
-  const result = spawnSync(process.execPath, [...launch, gateScript, ...args], { env: stepEnv, encoding: "utf8" });
+      ? ["confirm", assetArg, test.gate, "--note", "escape attempt"]
+      : ["require", assetArg, test.gate];
+  const launch = nul ? [nulWrapper] : [];
+  const result = spawnSync(process.execPath, [...launch, gateScript, ...args], { env, encoding: "utf8", timeout: 10_000 });
   const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
   const after = await tree(dir);
-  const outside = after.filter((file) => !before.includes(file) && !file.startsWith(`${characters}${path.sep}`));
-  const codeOk = result.status !== 0 && output.includes(test.code);
-  const treeOk = outside.length === 0 && after.length === before.length;
-  if (codeOk && treeOk && createHash("sha256").update(after.join("\n")).digest("hex") === digestBefore) passed += 1;
+  const insideRoot = (line) => line.startsWith(`${characters}${path.sep}`);
+  const outsideChanged = JSON.stringify(before.filter((line) => !insideRoot(line))) !== JSON.stringify(after.filter((line) => !insideRoot(line)));
+  let ok;
+  if (test.exit === 0) {
+    const gateFile = path.join(real, "gates", `${test.gate}-${test.asset.replaceAll("/", "-")}.json`);
+    let status = null;
+    try {
+      status = JSON.parse(await readFile(gateFile, "utf8")).status;
+    } catch {
+      status = null;
+    }
+    ok = result.status === 0 && !outsideChanged && status === test.status;
+  } else {
+    ok = result.status !== null && result.status !== 0 && output.includes(test.code) && JSON.stringify(before) === JSON.stringify(after);
+  }
+  if (ok) passed += 1;
   else {
     failed += 1;
-    console.error(`${test.name}: exit=${result.status} code=${output.trim()} outside=${outside.join(",")}`);
+    console.error(`${test.name}: exit=${result.status} signal=${result.signal ?? "-"} out=${output.trim()} outsideChanged=${outsideChanged}`);
   }
   await rm(dir, { recursive: true, force: true });
 }
@@ -74,7 +122,7 @@ await writeFile(auto, `${JSON.stringify({ ok: true, blocking: [] })}\n`);
 await writeFile(verdictA, `${JSON.stringify({ ...verdict, reviewer: "reviewer-a" })}\n`);
 await writeFile(verdictB, `${JSON.stringify({ ...verdict, reviewer: "reviewer-b" })}\n`);
 const env = { ...process.env, GATE_CHARACTERS_ROOT: characters, GATE_PROFILES_FILE: path.join(here, "profiles.json") };
-const happy = spawnSync(process.execPath, [gateScript, "aggregate", "_base/male", "G0", "--auto", auto, "--verdict", verdictA, "--verdict-b", verdictB], { env, encoding: "utf8" });
+const happy = spawnSync(process.execPath, [gateScript, "aggregate", "_base/male", "G0", "--auto", auto, "--verdict", verdictA, "--verdict-b", verdictB], { env, encoding: "utf8", timeout: 10_000 });
 const happyFile = path.join(characters, "_base", "gates", "G0-_base-male.json");
 let happyOk = false;
 try {
