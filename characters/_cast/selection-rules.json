@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "autoSelectWeight": 100,
+  "allowedSources": ["pilot", "pilot-variant", "library", "new", "procedural"],
+  "variantPolicy": "strip-family-structure-words-then-block-on-unmatched-style-tokens",
+  "familyStructureWords": {
+    "upper_iilseop": ["muted", "plain", "work", "jacket", "over", "shirt"],
+    "lower_iilseop": ["high", "waisted", "pleated", "trousers"],
+    "male_knee_boots_polished": ["polished", "knee", "boots"],
+    "glasses_round_copper": ["large", "perfectly", "round", "clear", "eyeglass", "lenses", "thin", "metal", "frames", "mandatory", "in"],
+    "upper_gimyeongyu": ["plain", "deep", "light", "high", "collared", "civilian", "coat", "over", "shirt"],
+    "male_breeches_buttoned_cuffs": ["breeches", "with", "buttoned", "cuffs", "wool"],
+    "footwear_gimyeongyu": ["polished", "oxford", "shoes"],
+    "glasses_rect": ["eyeglasses", "mandatory", "not", "large", "round", "light", "metal", "lenses"],
+    "upper_minunggi": ["muted", "work", "shirt", "with", "simple", "collar"],
+    "glasses_angular_light": ["thin", "light", "colored", "metal", "angular", "glasses"],
+    "upper_sinjongmok": ["dark", "high", "collar", "work", "jacket", "with", "inner", "webbing", "straps", "and", "field", "radio"],
+    "lower_sinjongmok": ["high", "waisted", "pleated", "trousers"],
+    "footwear_sinjongmok": ["laced", "walking", "shoes"],
+    "accessories_sinjongmok": ["woven", "straps", "over", "both", "shoulders", "a", "rounded", "rectangular", "speaker", "microphone", "with", "horizontal", "grille", "slots", "clipped", "to", "the", "strap", "on", "image", "s", "right", "cord", "extending", "downward", "into", "coil"],
+    "upper_bakseongsu": ["plain", "collarless", "cloth", "jacket", "over", "a", "muted", "round", "neck", "shirt", "simple", "front", "opening", "no", "uniform", "insignia", "logos", "armor", "embroidery", "or", "dangling", "tools"],
+    "lower_bakseongsu": ["trousers", "bloused", "over", "boots"],
+    "footwear_bakseongsu": ["steel", "toe", "work", "boots"],
+    "accessories_bakseongsu": ["rolled", "tool", "roll", "and", "work", "gloves", "tucked", "into", "the", "belt"],
+    "upper_jiyeonhui": ["화재로부터", "몸을", "보호하는", "용도의", "재킷형", "외투", "시안에서는", "으로", "표현했으며", "소재", "보호", "등급", "색상은", "정본", "미확정이다"],
+    "lower_jiyeonhui": ["각선미가", "드러나는", "짧은", "바지"],
+    "footwear_jiyeonhui": ["군화"],
+    "accessories_jiyeonhui": ["dispatch", "satchel"],
+    "upper_jeongyura": ["로고", "없는", "탁한", "작업", "재킷"],
+    "lower_jeongyura": ["high", "waisted", "wide", "leg", "trousers"],
+    "footwear_jeongyura": ["polished", "knee", "boots"],
+    "accessories_jeongyura": ["plain", "pocket", "watch", "on", "a", "short", "chain"]
+  },
+  "factSources": {
+    "gender": "cast.gender",
+    "role": "portrait-token.facts.role",
+    "faction": "person-details.stateName",
+    "socialTier": "person-details.commonTier mapped below",
+    "workMode": "role-derived mapping below",
+    "explicitSlot": "cast.slots + cast.garmentFamilies"
+  },
+  "tierMap": {
+    "T1": "leader",
+    "T2": "committee-chair",
+    "T3": "custodian",
+    "T5": "contractor"
+  },
+  "workModeByPerson": {
+    "person-0998": "field",
+    "person-1007": "office",
+    "person-1008": "field",
+    "person-1009": "field",
+    "person-1019": "field",
+    "person-1017": "field",
+    "person-0399": "office"
+  },
+  "rules": [
+    {"group":"upper","family":"upper_iilseop","priority":20,"base":10,"modifiers":[{"when":{"fact":"role","value":"제1분공방 이씨 가문 후계"},"factor":2,"add":20},{"when":{"fact":"workMode","value":"field"},"factor":1,"add":15}],"wikiKeywords":["clay-brown","cream"],"palette":{"name":"clay-brown / cream","hex":["#5C483E","#D8C8BC"]},"material":"wool-cloth","wear":"worn","cut":"plain work jacket","source":"pilot"},
+    {"group":"lower","family":"lower_iilseop","priority":20,"base":10,"modifiers":[{"when":{"fact":"faction","value":"규격맹"},"factor":2,"add":15}],"wikiKeywords":["cream"],"palette":{"name":"cream","hex":["#E7D8CA"]},"material":"wool-cloth","wear":"worn","cut":"high-waisted pleated","source":"pilot"},
+    {"group":"footwear","family":"male_knee_boots_polished","priority":20,"base":10,"modifiers":[{"when":{"fact":"role","value":"제1분공방 이씨 가문 후계"},"factor":2,"add":30}],"wikiKeywords":["polished leather knee boots"],"palette":{"name":"dark leather","hex":["#3B2C27"]},"material":"leather","wear":"maintained","cut":"knee boots","source":"pilot"},
+    {"group":"glasses","family":"glasses_round_copper","priority":20,"base":10,"modifiers":[{"when":{"fact":"socialTier","value":"committee-chair"},"factor":1,"add":10}],"wikiKeywords":["copper"],"palette":{"name":"copper","hex":["#967E72"]},"material":"metal-glass","wear":"maintained","cut":"large round thin frame","source":"procedural"},
+
+    {"group":"upper","family":"upper_gimyeongyu","priority":30,"base":10,"modifiers":[{"when":{"fact":"role","value":"온민의 수장"},"factor":2,"add":25},{"when":{"fact":"workMode","value":"office"},"factor":1,"add":15}],"wikiKeywords":["navy","gray"],"palette":{"name":"deep navy / light gray","hex":["#282936","#8E8B8D"]},"material":"wool-cloth","wear":"maintained","cut":"high-collar coat","source":"new"},
+    {"group":"lower","family":"male_breeches_buttoned_cuffs","priority":30,"base":10,"modifiers":[{"when":{"fact":"faction","value":"대한민국정부"},"factor":2,"add":20}],"wikiKeywords":["light gray","연회색"],"palette":{"name":"light gray","hex":["#8E8B8D"]},"material":"wool-cloth","wear":"maintained","cut":"buttoned-cuff breeches","source":"new"},
+    {"group":"footwear","family":"footwear_gimyeongyu","priority":30,"base":10,"modifiers":[{"when":{"fact":"workMode","value":"office"},"factor":2,"add":20}],"wikiKeywords":["leather"],"palette":{"name":"black-brown","hex":["#3C3A43"]},"material":"leather","wear":"polished","cut":"oxford shoes","source":"new"},
+    {"group":"glasses","family":"glasses_rect","priority":30,"base":10,"modifiers":[{"when":{"fact":"socialTier","value":"committee-chair"},"factor":1,"add":15}],"wikiKeywords":["eyeglasses"],"palette":{"name":"dark metal","hex":["#3C3A43"]},"material":"metal-glass","wear":"maintained","cut":"rectangular frame","source":"procedural"},
+
+    {"group":"upper","family":"upper_minunggi","priority":20,"base":10,"modifiers":[{"when":{"fact":"role","value":"규격맹 봉신 · 통신 정비·배분 담당(전 대전선 군주, 왕격 보존)"},"factor":2,"add":20},{"when":{"fact":"workMode","value":"field"},"factor":1,"add":15}],"wikiKeywords":["olive-green"],"palette":{"name":"muted olive","hex":["#5B5546"]},"material":"canvas","wear":"worn","cut":"simple-collar work shirt","source":"pilot-variant"},
+    {"group":"lower","family":"male_breeches_buttoned_cuffs","priority":20,"base":10,"modifiers":[{"when":{"fact":"faction","value":"규격맹"},"factor":2,"add":15}],"wikiKeywords":["dark brown","짙은 갈색"],"palette":{"name":"dark brown","hex":["#423D34"]},"material":"wool-cloth","wear":"worn","cut":"buttoned-cuff breeches","source":"library"},
+    {"group":"footwear","family":"male_knee_boots_polished","priority":20,"base":10,"modifiers":[{"when":{"fact":"role","value":"규격맹 봉신 · 통신 정비·배분 담당(전 대전선 군주, 왕격 보존)"},"factor":2,"add":30}],"wikiKeywords":["polished leather knee boots"],"palette":{"name":"dark leather","hex":["#3B372E"]},"material":"leather","wear":"maintained","cut":"knee boots","source":"library"},
+    {"group":"glasses","family":"glasses_angular_light","priority":20,"base":10,"modifiers":[{"when":{"fact":"socialTier","value":"leader"},"factor":1,"add":10}],"wikiKeywords":["light-colored"],"palette":{"name":"light warm gray","hex":["#BC9B83"]},"material":"metal-glass","wear":"maintained","cut":"thin angular frame","source":"procedural"},
+
+    {"group":"upper","family":"upper_sinjongmok","priority":20,"base":10,"modifiers":[{"when":{"fact":"role","value":"귀환망 현장 계약자"},"factor":2,"add":25},{"when":{"fact":"workMode","value":"field"},"factor":1,"add":20}],"wikiKeywords":["teal-green","mustard"],"palette":{"name":"dark teal / mustard","hex":["#2C3C41","#877150"]},"material":"canvas","wear":"weathered","cut":"high-collar field jacket","source":"new"},
+    {"group":"lower","family":"lower_sinjongmok","priority":20,"base":10,"modifiers":[{"when":{"fact":"faction","value":"아관사"},"factor":2,"add":20}],"wikiKeywords":["mustard"],"palette":{"name":"mustard","hex":["#877150"]},"material":"wool-cloth","wear":"worn","cut":"high-waisted pleated","source":"pilot-variant"},
+    {"group":"footwear","family":"footwear_sinjongmok","priority":20,"base":10,"modifiers":[{"when":{"fact":"workMode","value":"field"},"factor":2,"add":20}],"wikiKeywords":["leather"],"palette":{"name":"brown leather","hex":["#443D34"]},"material":"leather","wear":"weathered","cut":"laced walking shoes","source":"new"},
+    {"group":"accessory","family":"accessories_sinjongmok","priority":20,"base":10,"modifiers":[{"when":{"fact":"role","value":"귀환망 현장 계약자"},"factor":2,"add":30}],"wikiKeywords":["tan","black"],"palette":{"name":"tan / black","hex":["#766247","#273134"]},"material":"canvas-metal","wear":"worn","cut":"woven shoulder straps and speaker mic","source":"new"},
+
+    {"group":"upper","family":"upper_bakseongsu","priority":20,"base":10,"modifiers":[{"when":{"fact":"role","value":"사본 관리인 — 여러 권역의 사본을 맞추고 개정 요청을 모아 김연규에게 전한다."},"factor":2,"add":30},{"when":{"fact":"workMode","value":"field"},"factor":1,"add":15}],"wikiKeywords":["charcoal-gray","cream"],"palette":{"name":"charcoal / cream","hex":["#45464C","#EAE3D9"]},"material":"wool-cloth","wear":"worn","cut":"collarless jacket","source":"pilot-variant"},
+    {"group":"lower","family":"lower_bakseongsu","priority":20,"base":10,"modifiers":[{"when":{"fact":"faction","value":"대한민국정부"},"factor":2,"add":20}],"wikiKeywords":["forest green","wool"],"palette":{"name":"forest green","hex":["#3E493D"]},"material":"wool-cloth","wear":"worn","cut":"trousers bloused over boots","source":"pilot-variant"},
+    {"group":"footwear","family":"footwear_bakseongsu","priority":20,"base":10,"modifiers":[{"when":{"fact":"workMode","value":"field"},"factor":2,"add":20}],"wikiKeywords":["leather"],"palette":{"name":"charcoal leather","hex":["#37373B"]},"material":"leather-metal","wear":"worn","cut":"steel-toe work boots","source":"pilot-variant"},
+    {"group":"accessory","family":"accessories_bakseongsu","priority":20,"base":10,"modifiers":[{"when":{"fact":"socialTier","value":"custodian"},"factor":2,"add":25}],"wikiKeywords":["leather"],"palette":{"name":"brown leather","hex":["#A88473"]},"material":"leather","wear":"worn","cut":"belt tool roll and gloves","source":"new"},
+
+    {"group":"upper","family":"upper_jiyeonhui","priority":20,"base":10,"modifiers":[{"when":{"fact":"role","value":"독립 전령"},"factor":2,"add":25},{"when":{"fact":"workMode","value":"field"},"factor":1,"add":15}],"wikiKeywords":["어두운 회색"],"palette":{"name":"dark gray","hex":["#443D3C"]},"material":"fire-protective canvas","wear":"worn","cut":"protective jacket","source":"pilot-variant"},
+    {"group":"lower","family":"lower_jiyeonhui","priority":20,"base":10,"modifiers":[{"when":{"fact":"faction","value":"무소속"},"factor":2,"add":20}],"wikiKeywords":[],"palette":{"name":"charcoal","hex":["#312E2F"]},"material":"wool-cloth","wear":"worn","cut":"shorts, thighs visible","source":"new"},
+    {"group":"footwear","family":"footwear_jiyeonhui","priority":20,"base":10,"modifiers":[{"when":{"fact":"workMode","value":"field"},"factor":2,"add":20}],"wikiKeywords":["군화"],"palette":{"name":"dark leather","hex":["#403837"]},"material":"leather","wear":"weathered","cut":"combat boots","source":"new"},
+    {"group":"accessory","family":"accessories_jiyeonhui","priority":20,"base":10,"modifiers":[{"when":{"fact":"role","value":"독립 전령"},"factor":2,"add":30}],"wikiKeywords":["leather"],"palette":{"name":"brown leather","hex":["#B3856F"]},"material":"leather","wear":"weathered","cut":"dispatch satchel","source":"new"},
+
+    {"group":"upper","family":"upper_jeongyura","priority":30,"base":10,"modifiers":[{"when":{"fact":"role","value":"위원장"},"factor":2,"add":25},{"when":{"fact":"workMode","value":"office"},"factor":1,"add":15}],"wikiKeywords":["올리브회색"],"palette":{"name":"olive-gray","hex":["#5A564C"]},"material":"canvas","wear":"worn","cut":"logo-free work jacket","source":"pilot"},
+    {"group":"lower","family":"lower_jeongyura","priority":30,"base":10,"modifiers":[{"when":{"fact":"faction","value":"정동노총"},"factor":2,"add":20}],"wikiKeywords":["slate blue","wool"],"palette":{"name":"slate blue","hex":["#484A50"]},"material":"wool-cloth","wear":"worn","cut":"high-waisted wide-leg trousers","source":"pilot"},
+    {"group":"footwear","family":"footwear_jeongyura","priority":30,"base":10,"modifiers":[{"when":{"fact":"socialTier","value":"leader"},"factor":2,"add":20}],"wikiKeywords":["leather"],"palette":{"name":"dark leather","hex":["#39342F"]},"material":"leather","wear":"maintained","cut":"knee boots","source":"pilot"},
+    {"group":"accessory","family":"accessories_jeongyura","priority":30,"base":10,"modifiers":[{"when":{"fact":"role","value":"위원장"},"factor":2,"add":25}],"wikiKeywords":["brass"],"palette":{"name":"brass","hex":["#A0806D"]},"material":"metal","wear":"aged","cut":"plain pocket watch and short chain","source":"procedural"}
+  ],
+  "hairDefaults": {
+    "male": {"palette":{"name":"black","hex":["#282829"]},"material":"hair-cards","wear":"natural","source":"library"},
+    "female": {"palette":{"name":"black","hex":["#2A2929"]},"material":"hair-cards","wear":"natural","source":"library"}
+  }
+}

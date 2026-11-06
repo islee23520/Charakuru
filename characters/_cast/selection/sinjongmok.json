@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 1,
+  "personId": "person-1009",
+  "name": "신종목",
+  "folder": "sinjongmok",
+  "facts": {
+    "gender": "male",
+    "role": "귀환망 현장 계약자",
+    "faction": "아관사",
+    "socialTier": "contractor",
+    "workMode": "field"
+  },
+  "selections": [
+    {
+      "slot": "hair",
+      "family": "hair_sinjongmok",
+      "source": "library",
+      "palette": {
+        "name": "black",
+        "hex": [
+          "#282829"
+        ]
+      },
+      "material": "hair-cards",
+      "wear": "natural",
+      "ruleTrace": [
+        {
+          "kind": "wiki-explicit",
+          "weight": 100,
+          "text": "Short dark hair from the existing Tripo character portrait",
+          "result": "wins"
+        }
+      ]
+    },
+    {
+      "slot": "upper",
+      "family": "upper_sinjongmok",
+      "source": "new",
+      "palette": {
+        "name": "dark teal / mustard",
+        "hex": [
+          "#2C3C41",
+          "#877150"
+        ]
+      },
+      "material": "canvas",
+      "wear": "weathered",
+      "cut": "high-collar field jacket",
+      "ruleTrace": [
+        {
+          "kind": "base",
+          "value": 10,
+          "priority": 20,
+          "family": "upper_sinjongmok"
+        },
+        {
+          "kind": "modifier",
+          "fact": "role",
+          "expected": "귀환망 현장 계약자",
+          "actual": "귀환망 현장 계약자",
+          "matched": true,
+          "factor": 2,
+          "add": 25,
+          "weight": 45
+        },
+        {
+          "kind": "modifier",
+          "fact": "workMode",
+          "expected": "field",
+          "actual": "field",
+          "matched": true,
+          "factor": 1,
+          "add": 20,
+          "weight": 65
+        },
+        {
+          "kind": "style-variant",
+          "result": "keyword-match",
+          "matchedKeywords": [
+            "teal-green",
+            "mustard"
+          ]
+        },
+        {
+          "kind": "wiki-explicit",
+          "weight": 100,
+          "text": "Dark teal-green high-collar work jacket with mustard inner collar, webbing straps and field radio",
+          "family": "upper_sinjongmok",
+          "result": "family-wins"
+        },
+        {
+          "kind": "selection",
+          "rule": "first-weight-at-least-100-else-max",
+          "selected": "upper_sinjongmok"
+        }
+      ]
+    },
+    {
+      "slot": "lower",
+      "family": "lower_sinjongmok",
+      "source": "pilot-variant",
+      "palette": {
+        "name": "mustard",
+        "hex": [
+          "#877150"
+        ]
+      },
+      "material": "wool-cloth",
+      "wear": "worn",
+      "cut": "high-waisted pleated",
+      "ruleTrace": [
+        {
+          "kind": "base",
+          "value": 10,
+          "priority": 20,
+          "family": "lower_sinjongmok"
+        },
+        {
+          "kind": "modifier",
+          "fact": "faction",
+          "expected": "아관사",
+          "actual": "아관사",
+          "matched": true,
+          "factor": 2,
+          "add": 20,
+          "weight": 40
+        },
+        {
+          "kind": "style-variant",
+          "result": "keyword-match",
+          "matchedKeywords": [
+            "mustard"
+          ]
+        },
+        {
+          "kind": "wiki-explicit",
+          "weight": 100,
+          "text": "mustard high-waisted pleated trousers",
+          "family": "lower_sinjongmok",
+          "result": "family-wins"
+        },
+        {
+          "kind": "selection",
+          "rule": "first-weight-at-least-100-else-max",
+          "selected": "lower_sinjongmok"
+        }
+      ]
+    },
+    {
+      "slot": "footwear",
+      "family": "footwear_sinjongmok",
+      "source": "new",
+      "palette": {
+        "name": "brown leather",
+        "hex": [
+          "#443D34"
+        ]
+      },
+      "material": "leather",
+      "wear": "weathered",
+      "cut": "laced walking shoes",
+      "ruleTrace": [
+        {
+          "kind": "base",
+          "value": 10,
+          "priority": 20,
+          "family": "footwear_sinjongmok"
+        },
+        {
+          "kind": "modifier",
+          "fact": "workMode",
+          "expected": "field",
+          "actual": "field",
+          "matched": true,
+          "factor": 2,
+          "add": 20,
+          "weight": 40
+        },
+        {
+          "kind": "style-variant",
+          "result": "keyword-match",
+          "matchedKeywords": [
+            "leather"
+          ]
+        },
+        {
+          "kind": "wiki-explicit",
+          "weight": 100,
+          "text": "laced leather walking shoes",
+          "family": "footwear_sinjongmok",
+          "result": "family-wins"
+        },
+        {
+          "kind": "selection",
+          "rule": "first-weight-at-least-100-else-max",
+          "selected": "footwear_sinjongmok"
+        }
+      ]
+    },
+    {
+      "slot": "accessories",
+      "family": "accessories_sinjongmok",
+      "source": "new",
+      "palette": {
+        "name": "tan / black",
+        "hex": [
+          "#766247",
+          "#273134"
+        ]
+      },
+      "material": "canvas-metal",
+      "wear": "worn",
+      "cut": "woven shoulder straps and speaker mic",
+      "ruleTrace": [
+        {
+          "kind": "base",
+          "value": 10,
+          "priority": 20,
+          "family": "accessories_sinjongmok"
+        },
+        {
+          "kind": "modifier",
+          "fact": "role",
+          "expected": "귀환망 현장 계약자",
+          "actual": "귀환망 현장 계약자",
+          "matched": true,
+          "factor": 2,
+          "add": 30,
+          "weight": 50
+        },
+        {
+          "kind": "style-variant",
+          "result": "keyword-match",
+          "matchedKeywords": [
+            "tan",
+            "black"
+          ]
+        },
+        {
+          "kind": "wiki-explicit",
+          "weight": 100,
+          "text": "tan woven straps over both shoulders; a black, rounded-rectangular speaker microphone with horizontal grille slots clipped to the strap on the image's right, with a cord extending downward into a coil",
+          "family": "accessories_sinjongmok",
+          "result": "family-wins"
+        },
+        {
+          "kind": "selection",
+          "rule": "first-weight-at-least-100-else-max",
+          "selected": "accessories_sinjongmok"
+        }
+      ]
+    }
+  ]
+}

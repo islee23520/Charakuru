@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "personId": "person-1007",
+  "name": "김연규",
+  "folder": "gimyeongyu",
+  "facts": {
+    "gender": "male",
+    "role": "온민의 수장",
+    "faction": "대한민국정부",
+    "socialTier": "committee-chair",
+    "workMode": "office"
+  },
+  "selections": [
+    {
+      "slot": "hair",
+      "family": "hair_gimyeongyu",
+      "source": "library",
+      "palette": {
+        "name": "black",
+        "hex": [
+          "#282829"
+        ]
+      },
+      "material": "hair-cards",
+      "wear": "natural",
+      "ruleTrace": [
+        {
+          "kind": "wiki-explicit",
+          "weight": 100,
+          "text": "short black hair",
+          "result": "wins"
+        }
+      ]
+    },
+    {
+      "slot": "upper",
+      "family": "upper_gimyeongyu",
+      "source": "new",
+      "palette": {
+        "name": "deep navy / light gray",
+        "hex": [
+          "#282936",
+          "#8E8B8D"
+        ]
+      },
+      "material": "wool-cloth",
+      "wear": "maintained",
+      "cut": "high-collar coat",
+      "ruleTrace": [
+        {
+          "kind": "base",
+          "value": 10,
+          "priority": 30,
+          "family": "upper_gimyeongyu"
+        },
+        {
+          "kind": "modifier",
+          "fact": "role",
+          "expected": "온민의 수장",
+          "actual": "온민의 수장",
+          "matched": true,
+          "factor": 2,
+          "add": 25,
+          "weight": 45
+        },
+        {
+          "kind": "modifier",
+          "fact": "workMode",
+          "expected": "office",
+          "actual": "office",
+          "matched": true,
+          "factor": 1,
+          "add": 15,
+          "weight": 60
+        },
+        {
+          "kind": "style-variant",
+          "result": "keyword-match",
+          "matchedKeywords": [
+            "navy",
+            "gray"
+          ]
+        },
+        {
+          "kind": "wiki-explicit",
+          "weight": 100,
+          "text": "Plain deep navy high-collared civilian coat over light gray shirt",
+          "family": "upper_gimyeongyu",
+          "result": "family-wins"
+        },
+        {
+          "kind": "selection",
+          "rule": "first-weight-at-least-100-else-max",
+          "selected": "upper_gimyeongyu"
+        }
+      ]
+    },
+    {
+      "slot": "lower",
+      "family": "male_breeches_buttoned_cuffs",
+      "source": "new",
+      "palette": {
+        "name": "light gray",
+        "hex": [
+          "#8E8B8D"
+        ]
+      },
+      "material": "wool-cloth",
+      "wear": "maintained",
+      "cut": "buttoned-cuff breeches",
+      "ruleTrace": [
+        {
+          "kind": "base",
+          "value": 10,
+          "priority": 30,
+          "family": "male_breeches_buttoned_cuffs"
+        },
+        {
+          "kind": "modifier",
+          "fact": "faction",
+          "expected": "대한민국정부",
+          "actual": "대한민국정부",
+          "matched": true,
+          "factor": 2,
+          "add": 20,
+          "weight": 40
+        },
+        {
+          "kind": "style-variant",
+          "result": "keyword-match",
+          "matchedKeywords": [
+            "light gray"
+          ]
+        },
+        {
+          "kind": "wiki-explicit",
+          "weight": 100,
+          "text": "light gray wool breeches with buttoned cuffs",
+          "family": "male_breeches_buttoned_cuffs",
+          "result": "family-wins"
+        },
+        {
+          "kind": "selection",
+          "rule": "first-weight-at-least-100-else-max",
+          "selected": "male_breeches_buttoned_cuffs"
+        }
+      ]
+    },
+    {
+      "slot": "footwear",
+      "family": "footwear_gimyeongyu",
+      "source": "new",
+      "palette": {
+        "name": "black-brown",
+        "hex": [
+          "#3C3A43"
+        ]
+      },
+      "material": "leather",
+      "wear": "polished",
+      "cut": "oxford shoes",
+      "ruleTrace": [
+        {
+          "kind": "base",
+          "value": 10,
+          "priority": 30,
+          "family": "footwear_gimyeongyu"
+        },
+        {
+          "kind": "modifier",
+          "fact": "workMode",
+          "expected": "office",
+          "actual": "office",
+          "matched": true,
+          "factor": 2,
+          "add": 20,
+          "weight": 40
+        },
+        {
+          "kind": "style-variant",
+          "result": "keyword-match",
+          "matchedKeywords": [
+            "leather"
+          ]
+        },
+        {
+          "kind": "wiki-explicit",
+          "weight": 100,
+          "text": "polished leather oxford shoes",
+          "family": "footwear_gimyeongyu",
+          "result": "family-wins"
+        },
+        {
+          "kind": "selection",
+          "rule": "first-weight-at-least-100-else-max",
+          "selected": "footwear_gimyeongyu"
+        }
+      ]
+    },
+    {
+      "slot": "accessories",
+      "family": "glasses_rect",
+      "source": "procedural",
+      "palette": {
+        "name": "dark metal",
+        "hex": [
+          "#3C3A43"
+        ]
+      },
+      "material": "metal-glass",
+      "wear": "maintained",
+      "cut": "rectangular frame",
+      "ruleTrace": [
+        {
+          "kind": "base",
+          "value": 10,
+          "priority": 30,
+          "family": "glasses_rect"
+        },
+        {
+          "kind": "modifier",
+          "fact": "socialTier",
+          "expected": "committee-chair",
+          "actual": "committee-chair",
+          "matched": true,
+          "factor": 1,
+          "add": 15,
+          "weight": 25
+        },
+        {
+          "kind": "style-variant",
+          "result": "keyword-match",
+          "matchedKeywords": [
+            "eyeglasses"
+          ]
+        },
+        {
+          "kind": "wiki-explicit",
+          "weight": 100,
+          "text": "eyeglasses mandatory, not large round lenses",
+          "family": "glasses_rect",
+          "result": "family-wins"
+        },
+        {
+          "kind": "selection",
+          "rule": "first-weight-at-least-100-else-max",
+          "selected": "glasses_rect"
+        }
+      ]
+    }
+  ]
+}
