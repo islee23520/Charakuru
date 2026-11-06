@@ -139,6 +139,29 @@
       "contains": "UnknownStage"
     },
     {
+      "name": "record rejects stage nul",
+      "stage_reject": {
+        "command": "record",
+        "stage": "a\u0000b",
+        "task": {
+          "task_id": "reject-nul",
+          "credits_consumed": 2999
+        }
+      },
+      "exit": 1,
+      "contains": "UnknownStage"
+    },
+    {
+      "name": "check rejects stage nul",
+      "stage_reject": {
+        "command": "check",
+        "stage": "a\u0000b",
+        "cost": 100
+      },
+      "exit": 4,
+      "contains": "UnknownStage"
+    },
+    {
       "name": "record rejects stage trailing-space",
       "stage_reject": {
         "command": "record",
@@ -194,7 +217,66 @@
         "reserve": "retry"
       },
       "exit": 4,
-      "contains": "UnknownStage"
+      "contains": "UnknownPerson"
+    },
+    {
+      "name": "record rejects person constructor",
+      "stage_reject": {
+        "command": "record",
+        "stage": "reserve",
+        "person": "constructor",
+        "reserve": "retry",
+        "task": {
+          "task_id": "reject-person",
+          "credits_consumed": 1
+        }
+      },
+      "exit": 1,
+      "contains": "UnknownPerson"
+    },
+    {
+      "name": "record rejects task_id differing only by case",
+      "stage_reject": {
+        "command": "record",
+        "stage": "iilseop",
+        "seed": [
+          {
+            "task_id": "Task-A",
+            "credits_consumed": 10,
+            "stage": "iilseop",
+            "person": "iilseop",
+            "reserve_reason": null
+          }
+        ],
+        "task": {
+          "task_id": "task-a",
+          "credits_consumed": 10
+        }
+      },
+      "exit": 1,
+      "contains": "DuplicateTaskId"
+    },
+    {
+      "name": "record rejects task_id differing only by NFKC width",
+      "stage_reject": {
+        "command": "record",
+        "stage": "iilseop",
+        "seed": [
+          {
+            "task_id": "task-a",
+            "credits_consumed": 10,
+            "stage": "iilseop",
+            "person": "iilseop",
+            "reserve_reason": null
+          }
+        ],
+        "task": {
+          "task_id": "ＴＡＳＫ-Ａ",
+          "credits_consumed": 10
+        }
+      },
+      "exit": 1,
+      "contains": "DuplicateTaskId"
     }
   ]
 }

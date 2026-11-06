@@ -50,6 +50,11 @@ function own(record, key) {
   return typeof key === "string" && key.length > 0 && Object.hasOwn(record, key) ? record[key] : undefined;
 }
 
+// NFKC plus a casefold approximation (upper then lower maps ß to ss), so Task-A and task-a collide.
+function taskKey(id) {
+  return id.normalize("NFKC").toUpperCase().toLowerCase().normalize("NFKC");
+}
+
 function recordedSpend(ledger) {
   const taskSum = ledger.tasks.reduce((sum, task) => sum + task.credits_consumed, 0);
   const stageSum = Object.values(ledger.stages).reduce((sum, stage) => sum + stage.spent, 0);
@@ -81,7 +86,7 @@ try {
     ensureAccounting(ledger);
     assertConsistent(ledger);
     const reserveReason = o.reserve?.trim();
-    if (o.person !== undefined && !Object.hasOwn(ledger.people, o.person)) throw new Error(`UnknownStage:${o.person}`);
+    if (o.person !== undefined && !Object.hasOwn(ledger.people, o.person)) throw new Error(`UnknownPerson:${o.person}`);
     const person = o.person ?? stage.person;
     if (o.reserve !== undefined && !reserveReason) throw new Error("ReserveReasonRequired");
     if (!reserveReason && o.step && !planStage.required.some((entry) => entry.step === o.step)) {
@@ -108,11 +113,11 @@ try {
     const ledger = await json(ledgerPath);
     ensureAccounting(ledger);
     assertConsistent(ledger);
-    if (ledger.tasks.some((entry) => entry.task_id === task.task_id)) throw new Error(`DuplicateTaskId:${task.task_id}`);
+    if (ledger.tasks.some((entry) => taskKey(entry.task_id) === taskKey(task.task_id))) throw new Error(`DuplicateTaskId:${task.task_id}`);
     const stage = own(ledger.stages, stageKey);
     if (!stage) throw new Error(`UnknownStage:${stageKey}`);
     const requestedPerson = o.person ?? task.person ?? null;
-    if (requestedPerson && stage.person === null && !Object.hasOwn(ledger.people, requestedPerson)) throw new Error(`UnknownStage:${requestedPerson}`);
+    if (requestedPerson && stage.person === null && !Object.hasOwn(ledger.people, requestedPerson)) throw new Error(`UnknownPerson:${requestedPerson}`);
     const person = stage.person ?? requestedPerson;
     if (stageKey === "reserve" && !person) throw new Error("ReservePersonRequired");
     if (stage.person && person !== stage.person) throw new Error(`StagePersonMismatch:${stageKey}`);

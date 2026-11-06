@@ -8,7 +8,8 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const ledgerScript = path.join(root, "tools/cast/credit-ledger.mjs");
-const preload = path.join(root, "tools/cast/fixtures/adversarial-argv.mjs");
+// NUL cannot travel through a Windows argv, so NUL cases run the CLI through this wrapper (see its header).
+const nulWrapper = path.join(root, "tools/cast/fixtures/adversarial-argv.mjs");
 const ledgerSource = path.join(root, "characters/_cast/credits.json");
 const profilesSource = path.join(root, "characters/_cast/gen-profiles.json");
 const { cases } = JSON.parse(await readFile(path.join(root, "tools/cast/stage-cases.json"), "utf8"));
@@ -18,24 +19,28 @@ let failed = 0;
 for (const test of cases) {
   const dir = await mkdtemp(path.join(os.tmpdir(), "cast-stage-"));
   const ledger = path.join(dir, "credits.json");
-  await writeFile(ledger, await readFile(ledgerSource));
-  const env = { ...process.env, CAST_CREDITS_FILE: ledger, CAST_PROFILES_FILE: profilesSource };
   const spec = test.stage_reject;
-  const encoded = spec.stage === "" || spec.stage.includes("\0");
+  const seeded = JSON.parse(await readFile(ledgerSource, "utf8"));
+  for (const task of spec.seed ?? []) {
+    seeded.tasks.push(task);
+    seeded.stages[task.stage].spent += task.credits_consumed;
+  }
+  await writeFile(ledger, `${JSON.stringify(seeded, null, 2)}\n`);
+  const env = { ...process.env, CAST_CREDITS_FILE: ledger, CAST_PROFILES_FILE: profilesSource };
+  const nul = spec.stage.includes("\0");
   const args = [spec.command];
   if (spec.command === "record") {
     const taskPath = path.join(dir, "task.json");
     await writeFile(taskPath, JSON.stringify(spec.task));
     args.push("--task-json", taskPath);
   }
-  args.push("--stage", encoded ? "placeholder" : spec.stage);
+  args.push("--stage", nul ? "placeholder" : spec.stage);
   if (spec.person) args.push("--person", spec.person);
   if (spec.reserve) args.push("--reserve", spec.reserve);
   if (spec.cost !== undefined) args.push("--cost", String(spec.cost));
-  const stepEnv = encoded ? { ...env, ADVERSARIAL_ARG: spec.stage === "" ? "-" : "nul" } : env;
-  const launch = encoded ? ["--import", preload] : [];
+  const launch = nul ? [nulWrapper] : [];
   const before = createHash("sha256").update(await readFile(ledger)).digest("hex");
-  const result = spawnSync(process.execPath, [...launch, ledgerScript, ...args], { env: stepEnv, encoding: "utf8" });
+  const result = spawnSync(process.execPath, [...launch, ledgerScript, ...args], { env, encoding: "utf8", timeout: 10_000 });
   const after = createHash("sha256").update(await readFile(ledger)).digest("hex");
   const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
   const ok = result.status === test.exit && output.includes(test.contains) && after === before;
