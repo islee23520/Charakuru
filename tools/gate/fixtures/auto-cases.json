@@ -1,0 +1,717 @@
+{
+ "about": "Blender auto-check cases (todo 5 part B). Run all with: node tools/gate/fixtures/make-fixtures.mjs [--keep] [--evidence <file>]. Placeholders: ${BLENDER} = Blender executable, ${RUN_TMP} = temp dir made by make-fixtures.mjs, ${MAIN} = E:/git/Charakuru (read-only Tripo outputs, untracked), ${REF} = E:/git/seoul-dengoku-tools/ART-ASSETS/avatar-gen (read-only reference). Every auto-check writes the JSON named in out; exit 0 = pass, 1 = fail with codes[], 2 = usage/IO error. 'expect_code' must appear as a prefix of one entry of codes[] (exact string when it has no trailing '*'); 'expect_absent' prefixes must not appear. 'integration' entries feed the JSON of the named case to node tools/gate/gate.mjs aggregate (GATE_CHARACTERS_ROOT=${RUN_TMP}/gate-root, two fixture PASS verdicts from different reviewers) and assert the gate file status/blocking. Every case also asserts ok === pass and blocking === codes (empty on pass).",
+ "timeout_s": 600,
+ "fixtures": [
+  {
+   "name": "reduce iyeon body-wide to base_body",
+   "cmd": [
+    "${BLENDER}",
+    "-b",
+    "--factory-startup",
+    "-P",
+    "tools/cast/reduce.py",
+    "--",
+    "${MAIN}/characters/iyeon/tripo/body-wide/tripo-out/iyeon-body-wide-33c8914d/model.glb",
+    "${RUN_TMP}/fixtures/iyeon-body-12kq",
+    "--profile",
+    "base_body",
+    "--gender",
+    "f"
+   ],
+   "exit": 0,
+   "json": "${RUN_TMP}/fixtures/iyeon-body-12kq.reduce.json",
+   "assert": {
+    "quads_max": 12000,
+    "tris_max": 24000,
+    "fields": [
+     "src_sha",
+     "blend_sha",
+     "glb_sha",
+     "content_sha",
+     "quads",
+     "tris",
+     "bake_rmse",
+     "scale_factor",
+     "bake_rmse_regions",
+     "tool_version"
+    ]
+   }
+  },
+  {
+   "name": "reduce re-run 2 (determinism)",
+   "cmd": [
+    "${BLENDER}",
+    "-b",
+    "--factory-startup",
+    "-P",
+    "tools/cast/reduce.py",
+    "--",
+    "${MAIN}/characters/iyeon/tripo/body-wide/tripo-out/iyeon-body-wide-33c8914d/model.glb",
+    "${RUN_TMP}/fixtures/iyeon-body-12kq-rerun",
+    "--profile",
+    "base_body",
+    "--gender",
+    "f"
+   ],
+   "exit": 0,
+   "json": "${RUN_TMP}/fixtures/iyeon-body-12kq-rerun.reduce.json",
+   "compare_to": "${RUN_TMP}/fixtures/iyeon-body-12kq.reduce.json"
+  },
+  {
+   "name": "reduce re-run 3 (determinism)",
+   "cmd": [
+    "${BLENDER}",
+    "-b",
+    "--factory-startup",
+    "-P",
+    "tools/cast/reduce.py",
+    "--",
+    "${MAIN}/characters/iyeon/tripo/body-wide/tripo-out/iyeon-body-wide-33c8914d/model.glb",
+    "${RUN_TMP}/fixtures/iyeon-body-12kq-rerun3",
+    "--profile",
+    "base_body",
+    "--gender",
+    "f"
+   ],
+   "exit": 0,
+   "json": "${RUN_TMP}/fixtures/iyeon-body-12kq-rerun3.reduce.json",
+   "compare_to": "${RUN_TMP}/fixtures/iyeon-body-12kq.reduce.json"
+  },
+  {
+   "name": "reduce old voxel_div=150 without hand split (finger-merging fixture)",
+   "cmd": [
+    "${BLENDER}",
+    "-b",
+    "--factory-startup",
+    "-P",
+    "tools/cast/reduce.py",
+    "--",
+    "${MAIN}/characters/iyeon/tripo/body-wide/tripo-out/iyeon-body-wide-33c8914d/model.glb",
+    "${RUN_TMP}/fixtures/iyeon-body-v150",
+    "--profile",
+    "base_body",
+    "--gender",
+    "f",
+    "--voxel-div",
+    "150",
+    "--no-hand-split"
+   ],
+   "exit": 0,
+   "json": "${RUN_TMP}/fixtures/iyeon-body-v150.reduce.json",
+   "assert": {
+    "quads_max": 12000,
+    "fields": [
+     "src_sha",
+     "glb_sha",
+     "content_sha",
+     "quads"
+    ]
+   }
+  },
+  {
+   "name": "head topology fixtures from the female-underwear reference",
+   "cmd": [
+    "${BLENDER}",
+    "-b",
+    "--factory-startup",
+    "-P",
+    "tools/gate/fixtures/make-head-fixtures.py",
+    "--",
+    "${REF}/runtime/female-underwear/female-underwear.glb",
+    "${RUN_TMP}/fixtures/head"
+   ],
+   "exit": 0
+  },
+  {
+   "name": "synthetic G4/G5 fixtures",
+   "cmd": [
+    "${BLENDER}",
+    "-b",
+    "--factory-startup",
+    "-P",
+    "tools/gate/fixtures/make-synth-fixtures.py",
+    "--",
+    "${RUN_TMP}/fixtures/synth"
+   ],
+   "exit": 0
+  },
+  {
+   "name": "anatomy fixtures from the avatar-gen reference body",
+   "cmd": [
+    "${BLENDER}",
+    "-b",
+    "--factory-startup",
+    "-P",
+    "tools/gate/fixtures/make-anatomy-fixtures.py",
+    "--",
+    "${REF}/runtime/female-underwear/female-underwear.glb",
+    "${RUN_TMP}/fixtures/anat"
+   ],
+   "exit": 0
+  },
+  {
+   "name": "finger spike fixture (FingersExtra)",
+   "cmd": [
+    "${BLENDER}",
+    "-b",
+    "--factory-startup",
+    "-P",
+    "tools/gate/fixtures/make-finger-spike.py",
+    "--",
+    "${RUN_TMP}/fixtures/iyeon-body-12kq.blend",
+    "${RUN_TMP}/fixtures/iyeon-body-spike.blend"
+   ],
+   "exit": 0
+  }
+ ],
+ "cases": [
+  {
+   "name": "G1 reduced .blend passes (quads <= 12000, ratio >= 0.95)",
+   "in": "${RUN_TMP}/fixtures/iyeon-body-12kq.blend",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body",
+    "--source",
+    "${MAIN}/characters/iyeon/tripo/body-wide/tripo-out/iyeon-body-wide-33c8914d/model.glb",
+    "--only",
+    "format,components,arms,neck,fingers"
+   ],
+   "exit": 0,
+   "expect_codes_empty": true,
+   "assert": {
+    "checks.format.quads_max": 12000,
+    "checks.format.quad_ratio_min": 0.95,
+    "checks.arms.arms": 2,
+    "checks.arms.hands": 2,
+    "checks.fingers.out.L.tips_min": 5,
+    "checks.fingers.out.R.tips_min": 5
+   }
+  },
+  {
+   "name": "G1 reduced .glb passes (tris <= 24000)",
+   "in": "${RUN_TMP}/fixtures/iyeon-body-12kq.glb",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body",
+    "--source",
+    "${MAIN}/characters/iyeon/tripo/body-wide/tripo-out/iyeon-body-wide-33c8914d/model.glb",
+    "--only",
+    "format,components,arms,neck,fingers"
+   ],
+   "exit": 0,
+   "expect_codes_empty": true,
+   "assert": {
+    "checks.format.tris_max": 24000
+   }
+  },
+  {
+   "name": "G1 unreduced original GLB fails TriLimit",
+   "in": "${MAIN}/characters/iyeon/tripo/body-wide/tripo-out/iyeon-body-wide-33c8914d/model.glb",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body"
+   ],
+   "exit": 1,
+   "expect_code": "TriLimit:77555>24000"
+  },
+  {
+   "name": "G1 quad profile GLB without .blend fails QuadSourceMissing",
+   "in": "${MAIN}/characters/iyeon/tripo/body-wide/tripo-out/iyeon-body-wide-33c8914d/model.glb",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body",
+    "--only",
+    "format"
+   ],
+   "exit": 1,
+   "expect_code": "QuadSourceMissing"
+  },
+  {
+   "name": "G1 four-arm body fails ArmCount:4",
+   "in": "${MAIN}/characters/iyeon/tripo/iyeon-plain-v31/tripo-out/iyeon-plain-v31-32cc640d/model.glb",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body"
+   ],
+   "exit": 1,
+   "expect_code": "ArmCount:4"
+  },
+  {
+   "name": "G1 baked-headwear scalp fails head envelope",
+   "in": "${MAIN}/characters/iyeon/tripo/iyeon-scalp-v31/tripo-out/iyeon-scalp-v31-9f51930a/model.glb",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "head",
+    "--kind",
+    "head",
+    "--only",
+    "envelope"
+   ],
+   "exit": 1,
+   "expect_code": "HeadEnvelope:*"
+  },
+  {
+   "name": "G1 clean kit head passes head envelope",
+   "in": "${MAIN}/characters/iyeon/tripo/kit-head/tripo-out/iyeon-kit-head-0d52b80a/model.glb",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "head",
+    "--kind",
+    "head",
+    "--only",
+    "envelope"
+   ],
+   "exit": 0,
+   "expect_codes_empty": true
+  },
+  {
+   "name": "G1 head topology: reference open head passes",
+   "in": "${RUN_TMP}/fixtures/head/head-open.blend",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "head",
+    "--kind",
+    "head",
+    "--only",
+    "eyes,mouth,baked_eye"
+   ],
+   "exit": 0,
+   "expect_codes_empty": true
+  },
+  {
+   "name": "G1 head topology: closed-eye kit head fails EyeSocketClosed",
+   "in": "${MAIN}/characters/iyeon/tripo/kit-head/tripo-out/iyeon-kit-head-0d52b80a/model.glb",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "head",
+    "--kind",
+    "head",
+    "--only",
+    "eyes,mouth,baked_eye"
+   ],
+   "exit": 1,
+   "expect_code": "EyeSocketClosed:both"
+  },
+  {
+   "name": "G1 head topology: closed-mouth kit head fails MouthClosed",
+   "in": "${MAIN}/characters/jojaepyo/tripo/kit-head/tripo-out/jojaepyo-kit-head-4a2f37d7/model.glb",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "head",
+    "--kind",
+    "head",
+    "--only",
+    "eyes,mouth,baked_eye"
+   ],
+   "exit": 1,
+   "expect_code": "MouthClosed"
+  },
+  {
+   "name": "G1 head topology: eyeballs fused into the face fail BakedEyeball",
+   "in": "${RUN_TMP}/fixtures/head/head-baked-eye.blend",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "head",
+    "--kind",
+    "head",
+    "--only",
+    "eyes,mouth,baked_eye"
+   ],
+   "exit": 1,
+   "expect_code": "BakedEyeball:neg,pos"
+  },
+  {
+   "name": "G2 Auto Rig Pro VRM passes the contract",
+   "in": "${MAIN}/characters/iyeon/exports/iyeon.vrm",
+   "gate": "G2",
+   "args": [],
+   "exit": 0,
+   "expect_codes_empty": true
+  },
+  {
+   "name": "G2 Tripo biped rig has no arm chain",
+   "in": "${MAIN}/characters/iyeon/tripo/iyeon-doll-rig/tripo-out/iyeon-doll-rig-72ff5b1c/model.glb",
+   "gate": "G2",
+   "args": [],
+   "exit": 1,
+   "expect_code": "ArmChainMissing:L"
+  },
+  {
+   "name": "G3 open head with a face key passes",
+   "in": "${RUN_TMP}/fixtures/head/head-open.blend",
+   "gate": "G3",
+   "args": [],
+   "exit": 0,
+   "expect_codes_empty": true
+  },
+  {
+   "name": "G3 neck ring moved by a key fails",
+   "in": "${RUN_TMP}/fixtures/head/head-neck-moved.blend",
+   "gate": "G3",
+   "args": [],
+   "exit": 1,
+   "expect_code": "NeckRingDelta:neck_push:*"
+  },
+  {
+   "name": "G3 face morph closing the eye rims fails",
+   "in": "${RUN_TMP}/fixtures/head/head-rim-closed.blend",
+   "gate": "G3",
+   "args": [],
+   "exit": 1,
+   "expect_code": "RimClosed:eye_neg:blink_shut"
+  },
+  {
+   "name": "G3 lid pushed into the eyeball fails",
+   "in": "${RUN_TMP}/fixtures/head/head-lid-push.blend",
+   "gate": "G3",
+   "args": [],
+   "exit": 1,
+   "expect_code": "Penetration:Female_L_Eye_Core:lid_push:*"
+  },
+  {
+   "name": "G4 garment clear of the body in rest/walk/sit/elbow90 passes",
+   "in": "${RUN_TMP}/fixtures/synth/g4-pass.blend",
+   "gate": "G4",
+   "args": [],
+   "exit": 0,
+   "expect_codes_empty": true
+  },
+  {
+   "name": "G4 garment inside the body fails",
+   "in": "${RUN_TMP}/fixtures/synth/g4-penetrate.blend",
+   "gate": "G4",
+   "args": [],
+   "exit": 1,
+   "expect_code": "Penetration:sleeve:rest:*"
+  },
+  {
+   "name": "G4 hide group missing fails",
+   "in": "${RUN_TMP}/fixtures/synth/g4-hide-missing.blend",
+   "gate": "G4",
+   "args": [],
+   "exit": 1,
+   "expect_code": "HideGroupMissing:sleeve:no_such_group"
+  },
+  {
+   "name": "G5 assembled within budget passes",
+   "in": "${RUN_TMP}/fixtures/synth/g5-pass.blend",
+   "gate": "G5",
+   "args": [
+    "--only",
+    "budget,textures"
+   ],
+   "exit": 0,
+   "expect_codes_empty": true
+  },
+  {
+   "name": "G5 over budget and oversize texture fails",
+   "in": "${RUN_TMP}/fixtures/synth/g5-over.blend",
+   "gate": "G5",
+   "args": [
+    "--only",
+    "budget,textures"
+   ],
+   "exit": 1,
+   "expect_code": "TriTotal:*",
+   "expect_also": [
+    "ComponentBudget:body:*",
+    "TextureSize:head_BaseColor_4096:4096>2048"
+   ]
+  },
+  {
+   "name": "malformed: missing input file",
+   "in": "${RUN_TMP}/fixtures/does-not-exist.blend",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body"
+   ],
+   "exit": 2,
+   "expect_code": "InputMissing"
+  },
+  {
+   "name": "malformed: no profile anywhere",
+   "in": "${RUN_TMP}/fixtures/iyeon-body-12kq.glb",
+   "gate": "G1",
+   "args": [],
+   "exit": 1,
+   "expect_code": "ProfileMissing"
+  },
+  {
+   "name": "G1 fingers: new reduce keeps the source finger tips",
+   "in": "${RUN_TMP}/fixtures/iyeon-body-12kq.glb",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body",
+    "--only",
+    "fingers",
+    "--source",
+    "${MAIN}/characters/iyeon/tripo/body-wide/tripo-out/iyeon-body-wide-33c8914d/model.glb"
+   ],
+   "exit": 0,
+   "expect_codes_empty": true,
+   "assert": {
+    "checks.fingers.out.L.tips_min": 5,
+    "checks.fingers.out.R.tips_min": 5
+   }
+  },
+  {
+   "name": "G1 fingers: old voxel_div=150 reduce fails FingersMerged",
+   "in": "${RUN_TMP}/fixtures/iyeon-body-v150.glb",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body",
+    "--only",
+    "fingers",
+    "--source",
+    "${MAIN}/characters/iyeon/tripo/body-wide/tripo-out/iyeon-body-wide-33c8914d/model.glb"
+   ],
+   "exit": 1,
+   "expect_code": "FingersMerged:L:*",
+   "expect_also": [
+    "FingersMerged:R:*"
+   ]
+  },
+  {
+   "name": "G1 anatomy: reference avatar-gen female body passes",
+   "in": "${RUN_TMP}/fixtures/anat/anat-ref.blend",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body",
+    "--only",
+    "anatomy",
+    "--gender",
+    "f"
+   ],
+   "exit": 0,
+   "expect_codes_empty": true
+  },
+  {
+   "name": "G1 anatomy: Z-squashed copy fails",
+   "in": "${RUN_TMP}/fixtures/anat/anat-zsquash.blend",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body",
+    "--only",
+    "anatomy",
+    "--gender",
+    "f"
+   ],
+   "exit": 1,
+   "expect_code": "NonUniformScale",
+   "expect_also": [
+    "HeightOutOfBand:*"
+   ]
+  },
+  {
+   "name": "G1 anatomy: 1.3x head copy fails",
+   "in": "${RUN_TMP}/fixtures/anat/anat-bighead.blend",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body",
+    "--only",
+    "anatomy",
+    "--gender",
+    "f"
+   ],
+   "exit": 1,
+   "expect_code": "ProportionOutOfBand:head:*"
+  },
+  {
+   "name": "G1 anatomy: one arm 15% long fails",
+   "in": "${RUN_TMP}/fixtures/anat/anat-longarm.blend",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body",
+    "--only",
+    "anatomy",
+    "--gender",
+    "f"
+   ],
+   "exit": 1,
+   "expect_code": "AsymmetryOver2pct:arm"
+  },
+  {
+   "name": "G1 anatomy: floating copy fails NotOnGround",
+   "in": "${RUN_TMP}/fixtures/anat/anat-floating.blend",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body",
+    "--only",
+    "anatomy",
+    "--gender",
+    "f"
+   ],
+   "exit": 1,
+   "expect_code": "NotOnGround:*"
+  },
+  {
+   "name": "G1 head topology: eyes capped, mouth open fails EyeSocketClosed only",
+   "in": "${RUN_TMP}/fixtures/head/head-eyes-shut.blend",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "head",
+    "--kind",
+    "head",
+    "--only",
+    "eyes,mouth,baked_eye"
+   ],
+   "exit": 1,
+   "expect_code": "EyeSocketClosed:both",
+   "expect_absent": [
+    "MouthClosed"
+   ]
+  },
+  {
+   "name": "G1 head topology: mouth plugged, eyes open fails MouthClosed only",
+   "in": "${RUN_TMP}/fixtures/head/head-mouth-shut.blend",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "head",
+    "--kind",
+    "head",
+    "--only",
+    "eyes,mouth,baked_eye"
+   ],
+   "exit": 1,
+   "expect_code": "MouthClosed",
+   "expect_absent": [
+    "EyeSocketClosed"
+   ]
+  },
+  {
+   "name": "G5 anatomy on the assembled reference avatar",
+   "in": "${REF}/runtime/female-underwear/female-underwear.glb",
+   "gate": "G5",
+   "args": [
+    "--only",
+    "anatomy",
+    "--gender",
+    "f"
+   ],
+   "exit": 0,
+   "expect_codes_empty": true
+  },
+  {
+   "name": "G1 anatomy on the reduced iyeon body reports its real proportions (dressed source fails)",
+   "in": "${RUN_TMP}/fixtures/iyeon-body-12kq.blend",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body",
+    "--only",
+    "anatomy",
+    "--gender",
+    "f",
+    "--source",
+    "${MAIN}/characters/iyeon/tripo/body-wide/tripo-out/iyeon-body-wide-33c8914d/model.glb"
+   ],
+   "exit": 1,
+   "expect_code": "ProportionOutOfBand:crotch:*",
+   "expect_absent": [
+    "NotOnGround",
+    "NonUniformScale",
+    "HeightOutOfBand"
+   ],
+   "note": "iyeon body-wide wears a long one-sided skirt: the silhouette crotch is the skirt-split gap at 0.319 (source 0.313) and the leg silhouettes differ 16% L/R. Reported as measured; bands not widened. The base body for todo 10 is a new minimal-underwear generation, not this mesh.",
+   "expect_also": [
+    "AsymmetryOver2pct:leg"
+   ]
+  },
+  {
+   "name": "G5 anatomy on a non-humanoid assembly reports AnatomyUnmeasurable",
+   "in": "${RUN_TMP}/fixtures/synth/g5-pass.blend",
+   "gate": "G5",
+   "args": [
+    "--only",
+    "anatomy"
+   ],
+   "exit": 1,
+   "expect_code": "AnatomyUnmeasurable"
+  },
+  {
+   "name": "G1 fingers: extra spike on the left hand fails FingersExtra",
+   "in": "${RUN_TMP}/fixtures/iyeon-body-spike.blend",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body",
+    "--only",
+    "fingers",
+    "--source",
+    "${MAIN}/characters/iyeon/tripo/body-wide/tripo-out/iyeon-body-wide-33c8914d/model.glb"
+   ],
+   "exit": 1,
+   "expect_code": "FingersExtra:L:5->6",
+   "expect_absent": [
+    "FingersMerged"
+   ]
+  },
+  {
+   "name": "hard-killed auto-check leaves AutoRunIncomplete, not a stale pass",
+   "in": "${RUN_TMP}/fixtures/iyeon-body-12kq.glb",
+   "gate": "G1",
+   "args": [
+    "--profile",
+    "base_body",
+    "--only",
+    "format"
+   ],
+   "env": {
+    "AUTO_CHECK_TEST_ABORT": "1"
+   },
+   "reuse_out_of": "G1 reduced .glb passes (tris <= 24000)",
+   "exit": "nonzero",
+   "expect_code": "AutoRunIncomplete",
+   "expect_ok": false,
+   "note": "the output path already holds the passing JSON of the named case; the aborted run must overwrite it at start"
+  }
+ ],
+ "integration": [
+  {
+   "name": "integration: passing auto JSON + two PASS verdicts -> gate REVIEW_PASS",
+   "auto_case": "G1 reduced .blend passes (quads <= 12000, ratio >= 0.95)",
+   "asset": "fxint-pass",
+   "gate": "G1",
+   "exit": 0,
+   "status": "REVIEW_PASS",
+   "blocking_excludes": [
+    "AutoContractInvalid"
+   ]
+  },
+  {
+   "name": "integration: four-arm auto JSON -> gate FAIL with ArmCount:4",
+   "auto_case": "G1 four-arm body fails ArmCount:4",
+   "asset": "fxint-fail",
+   "gate": "G1",
+   "exit": 1,
+   "status": "FAIL",
+   "blocking_includes": [
+    "ArmCount:4"
+   ],
+   "blocking_excludes": [
+    "AutoContractInvalid"
+   ]
+  }
+ ]
+}
