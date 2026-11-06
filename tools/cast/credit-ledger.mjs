@@ -46,6 +46,22 @@ function ensureAccounting(ledger) {
   }
 }
 
+function own(record, key) {
+  return typeof key === "string" && key.length > 0 && Object.hasOwn(record, key) ? record[key] : undefined;
+}
+
+function recordedSpend(ledger) {
+  const taskSum = ledger.tasks.reduce((sum, task) => sum + task.credits_consumed, 0);
+  const stageSum = Object.values(ledger.stages).reduce((sum, stage) => sum + stage.spent, 0);
+  return Math.max(taskSum, stageSum);
+}
+
+function assertConsistent(ledger) {
+  const taskSum = ledger.tasks.reduce((sum, task) => sum + task.credits_consumed, 0);
+  const stageSum = Object.values(ledger.stages).reduce((sum, stage) => sum + stage.spent, 0);
+  if (ledger.tasks.length > 0 && taskSum !== stageSum) throw new Error("LedgerInconsistent");
+}
+
 function fail(reason) {
   console.error(reason);
   process.exitCode = 4;
@@ -56,19 +72,22 @@ try {
     const o = options(args);
     const stageKey = o.stage;
     const cost = Number(o.cost);
-    if (!stageKey || !Number.isSafeInteger(cost) || cost < 0) throw new Error("InvalidCost");
+    if (!stageKey) throw new Error("UnknownStage:");
+    if (!Number.isSafeInteger(cost) || cost < 0) throw new Error("InvalidCost");
     const [ledger, profileData] = await Promise.all([json(ledgerPath), json(profilesPath)]);
-    const stage = ledger.stages[stageKey];
-    const planStage = profileData.stages[stageKey];
+    const stage = own(ledger.stages, stageKey);
+    const planStage = own(profileData.stages, stageKey);
     if (!stage || !planStage) throw new Error(`UnknownStage:${stageKey}`);
     ensureAccounting(ledger);
+    assertConsistent(ledger);
     const reserveReason = o.reserve?.trim();
+    if (o.person !== undefined && !Object.hasOwn(ledger.people, o.person)) throw new Error(`UnknownStage:${o.person}`);
     const person = o.person ?? stage.person;
     if (o.reserve !== undefined && !reserveReason) throw new Error("ReserveReasonRequired");
     if (!reserveReason && o.step && !planStage.required.some((entry) => entry.step === o.step)) {
       fail(`UnlistedStep:${o.step}`);
     } else {
-      const totalSpent = Object.values(ledger.stages).reduce((sum, entry) => sum + entry.spent, 0);
+      const totalSpent = recordedSpend(ledger);
       if (totalSpent + cost > ledger.global_cap) fail("GlobalCapExceeded");
       else if (person && (ledger.people[person]?.spent ?? 0) + cost > ledger.person_cap) {
         fail(`PersonCapExceeded:${person}`);
@@ -85,27 +104,32 @@ try {
     if (typeof task.task_id !== "string" || !task.task_id.trim()) throw new Error("TaskIdRequired");
     if (!Number.isSafeInteger(task.credits_consumed) || task.credits_consumed < 0) throw new Error("InvalidCreditsConsumed");
     const stageKey = o.stage ?? task.stage;
-    if (!stageKey) throw new Error("RecordStageRequired");
+    if (!stageKey) throw new Error("UnknownStage:");
     const ledger = await json(ledgerPath);
     ensureAccounting(ledger);
+    assertConsistent(ledger);
     if (ledger.tasks.some((entry) => entry.task_id === task.task_id)) throw new Error(`DuplicateTaskId:${task.task_id}`);
-    const stage = ledger.stages[stageKey];
+    const stage = own(ledger.stages, stageKey);
     if (!stage) throw new Error(`UnknownStage:${stageKey}`);
-    const person = stage.person ?? o.person ?? task.person ?? null;
+    const requestedPerson = o.person ?? task.person ?? null;
+    if (requestedPerson && stage.person === null && !Object.hasOwn(ledger.people, requestedPerson)) throw new Error(`UnknownStage:${requestedPerson}`);
+    const person = stage.person ?? requestedPerson;
     if (stageKey === "reserve" && !person) throw new Error("ReservePersonRequired");
     if (stage.person && person !== stage.person) throw new Error(`StagePersonMismatch:${stageKey}`);
     const reserveReason = o.reserve?.trim() ?? task.reserve_reason?.trim();
     if (o.reserve !== undefined && !o.reserve.trim()) throw new Error("ReserveReasonRequired");
     if (stageKey === "reserve" && !reserveReason) throw new Error("ReserveReasonRequired");
     const cost = task.credits_consumed;
-    const totalSpent = Object.values(ledger.stages).reduce((sum, entry) => sum + entry.spent, 0);
+    const totalSpent = recordedSpend(ledger);
     if (totalSpent + cost > ledger.global_cap) throw new Error("GlobalCapExceeded");
-    if (person && ledger.people[person] && ledger.people[person].spent + cost > ledger.person_cap) {
+    const personSpent = person ? own(ledger.people, person) : undefined;
+    if (person && personSpent && personSpent.spent + cost > ledger.person_cap) {
       throw new Error(`PersonCapExceeded:${person}`);
     }
     const isReserveDraw = Boolean(reserveReason && person);
-    if (isReserveDraw && ledger.reserve_draws[person] + cost > ledger.reserve_draw_cap) {
-      throw new Error(`ReserveDrawCap:${person}:${ledger.reserve_draws[person]}+${cost}>${ledger.reserve_draw_cap}`);
+    const drawn = isReserveDraw ? own(ledger.reserve_draws, person) ?? 0 : 0;
+    if (isReserveDraw && drawn + cost > ledger.reserve_draw_cap) {
+      throw new Error(`ReserveDrawCap:${person}:${drawn}+${cost}>${ledger.reserve_draw_cap}`);
     }
     if ((stageKey === "reserve" || !reserveReason) && stage.spent + cost > stage.allocation) {
       throw new Error(`StageCapExceeded:${stageKey}`);
@@ -123,6 +147,7 @@ try {
   } else if (command === "report") {
     const ledger = await json(ledgerPath);
     ensureAccounting(ledger);
+    assertConsistent(ledger);
     console.log("Stage\tPerson\tAllocation\tSpent");
     for (const [key, stage] of Object.entries(ledger.stages)) console.log(`${key}\t${stage.person ?? "-"}\t${stage.allocation}\t${stage.spent}`);
     console.log("Person\tAllocation\tSpent");
@@ -133,6 +158,7 @@ try {
   } else if (command === "plan-check") {
     const [ledger, profileData] = await Promise.all([json(ledgerPath), json(profilesPath)]);
     ensureAccounting(ledger);
+    assertConsistent(ledger);
     const issues = [];
     for (const [key, stage] of Object.entries(profileData.stages)) {
       const required = stage.required.reduce((sum, entry) => {
