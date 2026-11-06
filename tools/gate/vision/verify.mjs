@@ -18,6 +18,23 @@ const cases = JSON.parse(readFileSync(join(HERE, "cases.json"), "utf-8"));
 const filterIdx = argv.indexOf("--filter");
 const runner = filterIdx >= 0 ? argv[filterIdx + 1] : null;
 
+// Real-render input (read-only, never copied or modified): E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm
+// $REAL is ONE temp G5 render of that VRM per verify run, created lazily by the first
+// "ensureRealRender" step and reused by every real-g5-* case (no committed/untracked evidence needed).
+const REAL_VRM = "E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm";
+const BLENDER = "C:/Program Files/Blender Foundation/Blender 5.2/blender.exe";
+let realDir = null;
+function ensureRealRender() {
+  if (realDir && existsSync(join(realDir, "manifest.json"))) return realDir;
+  if (!existsSync(REAL_VRM)) throw new Error(`RealInputMissing: VRM not found: ${REAL_VRM}`);
+  if (!existsSync(BLENDER)) throw new Error(`RealInputMissing: Blender not found: ${BLENDER}`);
+  if (!realDir) realDir = mkdtempSync(join(tmpdir(), "gate-vision-real-"));
+  const res = spawnSync(BLENDER, ["-b", "-P", "tools/gate/render-views.py", "--", REAL_VRM, realDir, "--preset", "G5"], { cwd: WT_ROOT, encoding: "utf-8", timeout: 300000 });
+  const out = (res.stdout || "") + (res.stderr || "");
+  if (res.status !== 0) throw new Error(`RealRenderFailed: exit ${res.status} :: ${out.trim().split("\n").slice(-3).join(" | ")}`);
+  return realDir;
+}
+
 let passed = 0;
 let failed = 0;
 const lines = [];
@@ -29,11 +46,16 @@ for (const c of cases) {
   let ok = true;
   const reasons = [];
   for (const step of c.steps) {
-    const exp = (s) => s.replaceAll("$FIX", fix).replaceAll("$TMP", tmp);
+    const exp = (s) => {
+      s = s.replaceAll("$FIX", fix).replaceAll("$TMP", tmp);
+      return s.includes("$REAL") ? s.replaceAll("$REAL", ensureRealRender()) : s;
+    };
     try {
       if (step.mkfixtures !== undefined) {
         const res = spawnSync("node", [join(HERE, "fixtures", "make-fixtures.mjs"), exp(step.mkfixtures)], { encoding: "utf-8" });
         if (res.status !== 0) throw new Error(`mkfixtures exit ${res.status}: ${(res.stderr || "").slice(0, 200)}`);
+      } else if (step.ensureRealRender !== undefined) {
+        ensureRealRender();
       } else if (step.unlink !== undefined) {
         const p = exp(step.unlink);
         if (existsSync(p)) unlinkSync(p);
@@ -157,6 +179,7 @@ for (const c of cases) {
   }
 }
 
+if (realDir) rmSync(realDir, { recursive: true, force: true });
 for (const l of lines) console.log(l);
 console.log(`VISION passed=${passed} failed=${failed}`);
 process.exit(failed ? 1 : 0);

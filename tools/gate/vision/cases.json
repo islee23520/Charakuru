@@ -184,11 +184,11 @@
     "name": "real-g5-crotch-metric",
     "summary": "crotch_z_m is the inseam vertex (0.5179 for jojaepyo, within 2%), is NOT the lowest central vertex, and crotch_to_height is in-band (not in SourceOutOfBand)",
     "steps": [
-      { "assertJsonClose": [".omo/evidence/modular-cast-tripo-parts/task-6-vision/g5-jojaepyo/manifest.json",
+      { "assertJsonClose": ["$REAL/manifest.json",
                               "anatomy.measured.crotch_z_m", 0.5179, 2] },
-      { "assertJsonNe": [".omo/evidence/modular-cast-tripo-parts/task-6-vision/g5-jojaepyo/manifest.json",
+      { "assertJsonNe": ["$REAL/manifest.json",
                           "anatomy.measured.crotch_z_m", "anatomy.measured.lowest_central_vertex_m"] },
-      { "assertJsonNotIn": [".omo/evidence/modular-cast-tripo-parts/task-6-vision/g5-jojaepyo/manifest.json",
+      { "assertJsonNotIn": ["$REAL/manifest.json",
                              "anatomy.SourceOutOfBand", "crotch_to_height"] }
     ],
     "expect": { "exit": 0 }
@@ -266,10 +266,11 @@
   },
   {
     "name": "real-g5-manifest",
-    "summary": "the real jojaepyo G5 render dir passes the full manifest assertion",
+    "summary": "the freshly rendered jojaepyo G5 temp dir ($REAL, shared per verify run) passes the full manifest assertion",
     "steps": [
+      { "ensureRealRender": true },
       { "run": ["node", "tools/gate/vision/check-render-manifest.mjs",
-                ".omo/evidence/modular-cast-tripo-parts/task-6-vision/g5-jojaepyo",
+                "$REAL",
                 "--preset", "G5", "--min-png", "25"] }
     ],
     "expect": { "exit": 0, "contains": "\"ok\": true" }
@@ -289,11 +290,8 @@
     "name": "render-real-g5",
     "summary": "a full real G5 render into a temp dir exits 0 and passes the manifest assertion",
     "steps": [
-      { "run": ["C:/Program Files/Blender Foundation/Blender 5.2/blender.exe", "-b",
-                "-P", "tools/gate/render-views.py", "--",
-                "E:/git/Charakuru/characters/jojaepyo/exports/jojaepyo.vrm",
-                "$TMP/real", "--preset", "G5"] },
-      { "run": ["node", "tools/gate/vision/check-render-manifest.mjs", "$TMP/real", "--preset", "G5", "--min-png", "25"] }
+      { "ensureRealRender": true },
+      { "run": ["node", "tools/gate/vision/check-render-manifest.mjs", "$REAL", "--preset", "G5", "--min-png", "25"] }
     ],
     "expect": { "exit": 0, "contains": "\"ok\": true" }
   }
